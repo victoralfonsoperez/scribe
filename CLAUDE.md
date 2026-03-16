@@ -53,6 +53,7 @@ Scribe is a local-first macOS Electron app for meeting transcription and summari
 
 - Use feature branches for all development (never commit directly to main)
 - Push changes and create PRs against main for review
+- After completing a feature/phase, mark it as done in `ROADMAP.md`
 
 ## Platform
 
