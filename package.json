@@ -19,13 +19,13 @@
     "package": "npm run build && electron-builder --mac"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
     "better-sqlite3": "^12.8.0",
     "node-addon-api": "^8.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@anthropic-ai/sdk": "^0.39.0",
     "@tailwindcss/vite": "^4.1.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/react": "^19.0.0",

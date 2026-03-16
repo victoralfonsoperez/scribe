@@ -93,6 +93,28 @@ export interface SearchResultGroup {
 
 export type ExportFormat = "markdown" | "text";
 
+// Summary types
+export interface Summary {
+  id: string;
+  meetingId: string;
+  prompt: string;
+  content: string;
+  model: string;
+  createdAt: number;
+}
+
+export interface SummarySettings {
+  apiKey: string;
+  provider: "claude" | "ollama";
+  ollamaUrl: string;
+  ollamaModel: string;
+}
+
+export interface SummaryStatus {
+  state: "idle" | "generating" | "done" | "error";
+  error?: string;
+}
+
 export interface ScribeAPI {
   getVersion: () => Promise<string>;
   startRecording: () => Promise<{ ok: boolean; error?: string }>;
@@ -139,6 +161,17 @@ export interface ScribeAPI {
     id: string,
     format: ExportFormat,
   ) => Promise<string | null>;
+
+  // Summaries
+  generateSummary: (
+    meetingId: string,
+    promptKey?: string,
+  ) => Promise<{ ok: boolean; error?: string }>;
+  listSummaries: (meetingId: string) => Promise<Summary[]>;
+  deleteSummary: (id: string) => Promise<{ ok: boolean; error?: string }>;
+  getSummarySettings: () => Promise<SummarySettings>;
+  setSummarySettings: (settings: SummarySettings) => Promise<void>;
+  onSummaryStatus: (callback: (status: SummaryStatus) => void) => () => void;
 
   // Whisper binary
   getWhisperStatus: () => Promise<{

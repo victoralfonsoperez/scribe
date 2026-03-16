@@ -84,13 +84,13 @@ Persist meetings so they're not lost when the app closes.
 
 The feature that turns a wall of text into something useful.
 
-- [ ] Anthropic SDK integration (API key stored in electron-store)
-- [ ] Summary prompt engineering (action items, decisions, key topics, follow-ups)
-- [ ] Generate summary on meeting end (or on demand)
-- [ ] Summary view with structured sections
-- [ ] Re-summarize with different prompts / focus areas
-- [ ] Optional: Ollama integration for fully local summarization
-- [ ] Copy / export summary as markdown
+- [x] Anthropic SDK integration (API key stored in settings)
+- [x] Summary prompt engineering (action items, decisions, key topics, follow-ups)
+- [x] Generate summary on demand
+- [x] Summary view with structured sections
+- [x] Re-summarize with different prompts (standard, brief, detailed)
+- [x] Ollama integration for fully local summarization
+- [x] Copy / export summary as markdown
 
 ### Phase 5 — Polish
 
