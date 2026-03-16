@@ -56,29 +56,29 @@ The highest-risk piece. Validate that system audio capture works before building
 - [x] Request and handle macOS permissions (microphone, screen recording)
 - [x] Basic UI: start/stop recording button, audio level indicator
 
-### Phase 2 — Transcription
+### Phase 2 — Transcription ✅
 
 Wire up whisper.cpp and get text from audio.
 
-- [ ] Bundle whisper.cpp binary for macOS (arm64 + x86_64)
-- [ ] Download/manage Whisper models (tiny, base, small)
-- [ ] Spawn whisper.cpp as child process, feed WAV chunks
-- [ ] Parse whisper output (timestamps + text segments)
-- [ ] Stream transcript segments to renderer via IPC
-- [ ] Live transcript view (auto-scrolling, timestamped lines)
-- [ ] Model selector in settings (size vs speed tradeoff)
+- [x] Bundle whisper.cpp binary for macOS (arm64 + x86_64)
+- [x] Download/manage Whisper models (tiny, base, small)
+- [x] Spawn whisper.cpp as child process, feed WAV chunks
+- [x] Parse whisper output (timestamps + text segments)
+- [x] Stream transcript segments to renderer via IPC
+- [x] Live transcript view (auto-scrolling, timestamped lines)
+- [x] Model selector in settings (size vs speed tradeoff)
 
-### Phase 3 — Storage & history
+### Phase 3 — Storage & history ✅
 
 Persist meetings so they're not lost when the app closes.
 
-- [ ] Design SQLite schema (meetings, segments, summaries)
-- [ ] Save transcript segments as they arrive
-- [ ] Save raw audio files to app data directory
-- [ ] Meeting history list view (date, duration, title)
-- [ ] Full-text search across transcripts
-- [ ] Delete / rename meetings
-- [ ] Export transcript as markdown / plain text
+- [x] Design SQLite schema (meetings, segments, summaries)
+- [x] Save transcript segments as they arrive
+- [x] Save raw audio files to app data directory
+- [x] Meeting history list view (date, duration, title)
+- [x] Full-text search across transcripts
+- [x] Delete / rename meetings
+- [x] Export transcript as markdown / plain text
 
 ### Phase 4 — Summarization
 

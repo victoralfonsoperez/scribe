@@ -4,9 +4,12 @@ import AudioLevelMeter from "./components/AudioLevelMeter.js";
 import RecordButton from "./components/RecordButton.js";
 import TranscriptView from "./components/TranscriptView.js";
 import ModelSelector from "./components/ModelSelector.js";
+import MeetingHistory from "./components/MeetingHistory.js";
+import MeetingDetail from "./components/MeetingDetail.js";
 import { useTranscription } from "./hooks/useTranscription.js";
 
 type RecordingState = RecordingStatus["state"];
+type View = "recording" | "history" | "meeting";
 
 function App() {
   const [state, setState] = useState<RecordingState>("idle");
@@ -14,9 +17,16 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [segmentCount, setSegmentCount] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
+  const [view, setView] = useState<View>("recording");
+  const [selectedMeetingId, setSelectedMeetingId] = useState<string | null>(
+    null,
+  );
   const cleanupRefs = useRef<(() => void)[]>([]);
-  const { segments, status: transcriptionStatus, clearSegments } =
-    useTranscription();
+  const {
+    segments,
+    status: transcriptionStatus,
+    clearSegments,
+  } = useTranscription();
 
   useEffect(() => {
     const unsub1 = window.scribe.onRecordingStatus((status) => {
@@ -65,60 +75,119 @@ function App() {
     }
   }, [state, clearSegments]);
 
+  const handleSelectMeeting = useCallback((id: string) => {
+    setSelectedMeetingId(id);
+    setView("meeting");
+  }, []);
+
+  const handleBackFromMeeting = useCallback(() => {
+    setSelectedMeetingId(null);
+    setView("history");
+  }, []);
+
+  const isRecording = state === "recording" || state === "stopping";
+
   return (
     <div className="flex h-screen flex-col bg-gray-950 text-white">
       {/* Header — pl-20 avoids macOS traffic light buttons */}
       <div className="flex items-center justify-between border-b border-gray-800 py-3 pl-20 pr-4">
         <h1 className="text-lg font-bold">Scribe</h1>
-        <button
-          onClick={() => setShowSettings(true)}
-          className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-800 hover:text-white"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            className="h-5 w-5"
-          >
-            <path
-              fillRule="evenodd"
-              d="M7.84 1.804A1 1 0 018.82 1h2.36a1 1 0 01.98.804l.331 1.652a6.993 6.993 0 011.929 1.115l1.598-.54a1 1 0 011.186.447l1.18 2.044a1 1 0 01-.205 1.251l-1.267 1.113a7.047 7.047 0 010 2.228l1.267 1.113a1 1 0 01.206 1.25l-1.18 2.045a1 1 0 01-1.187.447l-1.598-.54a6.993 6.993 0 01-1.929 1.115l-.33 1.652a1 1 0 01-.98.804H8.82a1 1 0 01-.98-.804l-.331-1.652a6.993 6.993 0 01-1.929-1.115l-1.598.54a1 1 0 01-1.186-.447l-1.18-2.044a1 1 0 01.205-1.251l1.267-1.114a7.05 7.05 0 010-2.227L1.821 7.773a1 1 0 01-.206-1.25l1.18-2.045a1 1 0 011.187-.447l1.598.54A6.993 6.993 0 017.51 3.456l.33-1.652zM10 13a3 3 0 100-6 3 3 0 000 6z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </button>
-      </div>
-
-      {/* Controls Bar */}
-      <div className="flex items-center gap-4 border-b border-gray-800 px-4 py-3">
-        <RecordButton state={state} onClick={handleClick} />
-
-        <div className="flex-1">
-          <AudioLevelMeter level={level} />
-          <div className="mt-1 flex items-center gap-2">
-            <p className="text-xs font-medium text-gray-400">
-              {state === "idle" && "Ready to record"}
-              {state === "recording" && "Recording..."}
-              {state === "stopping" && "Stopping..."}
-              {state === "error" && "Error occurred"}
-            </p>
-            {state === "recording" && segmentCount > 0 && (
-              <span className="text-xs text-gray-500">
-                · {segmentCount} segment{segmentCount !== 1 ? "s" : ""}
-              </span>
-            )}
+        <div className="flex items-center gap-2">
+          {/* Tab navigation */}
+          <div className="flex rounded-lg border border-gray-800 bg-gray-900 p-0.5">
+            <button
+              onClick={() => setView("recording")}
+              className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                view === "recording"
+                  ? "bg-gray-700 text-white"
+                  : "text-gray-400 hover:text-white"
+              }`}
+            >
+              Recording
+            </button>
+            <button
+              onClick={() => setView("history")}
+              disabled={isRecording}
+              className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                view === "history" || view === "meeting"
+                  ? "bg-gray-700 text-white"
+                  : "text-gray-400 hover:text-white"
+              } disabled:cursor-not-allowed disabled:opacity-50`}
+            >
+              History
+            </button>
           </div>
+          <button
+            onClick={() => setShowSettings(true)}
+            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-800 hover:text-white"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              className="h-5 w-5"
+            >
+              <path
+                fillRule="evenodd"
+                d="M7.84 1.804A1 1 0 018.82 1h2.36a1 1 0 01.98.804l.331 1.652a6.993 6.993 0 011.929 1.115l1.598-.54a1 1 0 011.186.447l1.18 2.044a1 1 0 01-.205 1.251l-1.267 1.113a7.047 7.047 0 010 2.228l1.267 1.113a1 1 0 01.206 1.25l-1.18 2.045a1 1 0 01-1.187.447l-1.598-.54a6.993 6.993 0 01-1.929 1.115l-.33 1.652a1 1 0 01-.98.804H8.82a1 1 0 01-.98-.804l-.331-1.652a6.993 6.993 0 01-1.929-1.115l-1.598.54a1 1 0 01-1.186-.447l-1.18-2.044a1 1 0 01.205-1.251l1.267-1.114a7.05 7.05 0 010-2.227L1.821 7.773a1 1 0 01-.206-1.25l1.18-2.045a1 1 0 011.187-.447l1.598.54A6.993 6.993 0 017.51 3.456l.33-1.652zM10 13a3 3 0 100-6 3 3 0 000 6z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
         </div>
       </div>
 
-      {error && (
-        <div className="border-b border-red-900/50 bg-red-950/30 px-4 py-2">
-          <p className="text-xs text-red-400">{error}</p>
-        </div>
+      {/* Recording view */}
+      {view === "recording" && (
+        <>
+          {/* Controls Bar */}
+          <div className="flex items-center gap-4 border-b border-gray-800 px-4 py-3">
+            <RecordButton state={state} onClick={handleClick} />
+
+            <div className="flex-1">
+              <AudioLevelMeter level={level} />
+              <div className="mt-1 flex items-center gap-2">
+                <p className="text-xs font-medium text-gray-400">
+                  {state === "idle" && "Ready to record"}
+                  {state === "recording" && "Recording..."}
+                  {state === "stopping" && "Stopping..."}
+                  {state === "error" && "Error occurred"}
+                </p>
+                {state === "recording" && segmentCount > 0 && (
+                  <span className="text-xs text-gray-500">
+                    · {segmentCount} segment{segmentCount !== 1 ? "s" : ""}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {error && (
+            <div className="border-b border-red-900/50 bg-red-950/30 px-4 py-2">
+              <p className="text-xs text-red-400">{error}</p>
+            </div>
+          )}
+
+          {/* Transcript View */}
+          <TranscriptView
+            segments={segments}
+            status={transcriptionStatus}
+          />
+        </>
       )}
 
-      {/* Transcript View */}
-      <TranscriptView segments={segments} status={transcriptionStatus} />
+      {/* History view */}
+      {view === "history" && (
+        <MeetingHistory onSelect={handleSelectMeeting} />
+      )}
+
+      {/* Meeting detail view */}
+      {view === "meeting" && selectedMeetingId && (
+        <MeetingDetail
+          meetingId={selectedMeetingId}
+          onBack={handleBackFromMeeting}
+        />
+      )}
 
       {/* Settings Modal */}
       {showSettings && (

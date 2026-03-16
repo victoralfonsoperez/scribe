@@ -24,6 +24,16 @@ const api: ScribeAPI = {
   onTranscriptionStatus: (callback) =>
     onEvent("transcription:status", callback),
 
+  // Meetings
+  listMeetings: () => ipcRenderer.invoke("meeting:list"),
+  getMeeting: (id) => ipcRenderer.invoke("meeting:get", id),
+  renameMeeting: (id, title) =>
+    ipcRenderer.invoke("meeting:rename", id, title),
+  deleteMeeting: (id) => ipcRenderer.invoke("meeting:delete", id),
+  searchMeetings: (query) => ipcRenderer.invoke("meeting:search", query),
+  exportMeeting: (id, format) =>
+    ipcRenderer.invoke("meeting:export", id, format),
+
   // Model management
   listModels: () => ipcRenderer.invoke("model:list"),
   downloadModel: (name) => ipcRenderer.invoke("model:download", name),
