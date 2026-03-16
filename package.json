@@ -10,6 +10,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "rebuild": "node-gyp rebuild",
+    "postinstall": "node-gyp rebuild",
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
@@ -17,6 +19,7 @@
     "package": "npm run build && electron-builder --mac"
   },
   "dependencies": {
+    "node-addon-api": "^8.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
@@ -58,9 +61,16 @@
       "entitlementsInherit": "build/entitlements.mac.plist",
       "hardenedRuntime": true
     },
+    "npmRebuild": true,
     "files": [
       "dist-electron/**/*",
       "dist/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "build/Release/scribe_audio.node",
+        "to": "native/scribe_audio.node"
+      }
     ],
     "directories": {
       "output": "release"
