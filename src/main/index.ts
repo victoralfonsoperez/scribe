@@ -30,7 +30,9 @@ const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
-    icon: path.join(app.getAppPath(), "build", "icon.png"),
+    icon: app.isPackaged
+      ? path.join(process.resourcesPath, "icon.png")
+      : path.join(__dirname, "../../build/icon.png"),
     titleBarStyle: "hiddenInset",
     webPreferences: {
       preload: path.join(__dirname, "../preload/preload.js"),
@@ -92,7 +94,19 @@ const llmClient = new LLMClient();
 const summaryService = new SummaryService(llmClient, meetingRepo);
 registerSummaryIPC(summaryService, () => mainWindow);
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  if (process.platform === "darwin") {
+    const iconPath = app.isPackaged
+      ? path.join(process.resourcesPath, "icon.png")
+      : path.join(__dirname, "../../build/icon.png");
+    try {
+      app.dock?.setIcon(iconPath);
+    } catch {
+      // Icon not found — continue with default
+    }
+  }
+  createWindow();
+});
 
 app.on("window-all-closed", () => {
   mainWindow = null;
