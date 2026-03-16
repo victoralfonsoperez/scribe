@@ -49,6 +49,7 @@
     "appId": "com.scribe.app",
     "productName": "Scribe",
     "mac": {
+      "icon": "build/icon.icns",
       "category": "public.app-category.productivity",
       "target": [
         {

@@ -1,6 +1,7 @@
 import { ipcMain, BrowserWindow } from "electron";
 import type { SummaryService } from "./summary-service.js";
 import type { SummarySettings } from "../shared/types.js";
+import { notify } from "./notify.js";
 
 export function registerSummaryIPC(
   summaryService: SummaryService,
@@ -18,6 +19,7 @@ export function registerSummaryIPC(
         await summaryService.generateSummary(meetingId, promptKey);
 
         win?.webContents.send("summary:status", { state: "done" });
+        notify("Summary Ready", "Meeting summary has been generated.", win);
         return { ok: true };
       } catch (err) {
         const error = err instanceof Error ? err.message : String(err);

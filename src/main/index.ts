@@ -30,6 +30,7 @@ const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
+    icon: path.join(app.getAppPath(), "build", "icon.png"),
     titleBarStyle: "hiddenInset",
     webPreferences: {
       preload: path.join(__dirname, "../preload/preload.js"),
@@ -56,22 +57,8 @@ const meetingService = new MeetingService(meetingRepo);
 const { whisperManager, modelManager, transcriptionService } =
   createTranscriptionServices();
 
-// Register audio IPC with callbacks for meeting lifecycle
-registerAudioIPC(() => mainWindow, {
-  onSegment: (segment) => {
-    transcriptionService.enqueue(segment.path, segment.index);
-  },
-  onRecordingStart: (sessionDir) => {
-    meetingService.startMeeting(sessionDir);
-    transcriptionService.clearSegments();
-  },
-  onRecordingStop: () => {
-    meetingService.endMeeting();
-  },
-});
-
 // Register transcription IPC handlers (with meeting segment persistence)
-registerTranscriptionIPC(
+const transcriptionControls = registerTranscriptionIPC(
   () => mainWindow,
   whisperManager,
   modelManager,
@@ -80,6 +67,22 @@ registerTranscriptionIPC(
     meetingService.addSegment(segment);
   },
 );
+
+// Register audio IPC with callbacks for meeting lifecycle
+registerAudioIPC(() => mainWindow, {
+  onSegment: (segment) => {
+    transcriptionService.enqueue(segment.path, segment.index);
+  },
+  onRecordingStart: (sessionDir) => {
+    meetingService.startMeeting(sessionDir);
+    transcriptionService.clearSegments();
+    transcriptionControls.onRecordingStart();
+  },
+  onRecordingStop: () => {
+    meetingService.endMeeting();
+    transcriptionControls.onRecordingStop();
+  },
+});
 
 // Register meeting IPC handlers
 registerMeetingIPC(meetingService, meetingRepo);
