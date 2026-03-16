@@ -58,9 +58,18 @@ export type OnSegmentCallback = (segment: {
   index: number;
 }) => void;
 
+export type OnRecordingStartCallback = (sessionDir: string) => void;
+export type OnRecordingStopCallback = () => void;
+
+export interface AudioIPCCallbacks {
+  onSegment?: OnSegmentCallback;
+  onRecordingStart?: OnRecordingStartCallback;
+  onRecordingStop?: OnRecordingStopCallback;
+}
+
 export function registerAudioIPC(
   getMainWindow: () => BrowserWindow | null,
-  onSegment?: OnSegmentCallback,
+  callbacks?: AudioIPCCallbacks,
 ): void {
   let addon: NativeAddon | null = null;
 
@@ -92,7 +101,7 @@ export function registerAudioIPC(
 
     native.setSegmentCallback((segment) => {
       sendToRenderer("recording:segment", segment);
-      onSegment?.(segment);
+      callbacks?.onSegment?.(segment);
     });
   }
 
@@ -106,6 +115,9 @@ export function registerAudioIPC(
 
       const sessionDir = getSessionDir();
       const result = native.startRecording(sessionDir);
+      if (result.ok) {
+        callbacks?.onRecordingStart?.(sessionDir);
+      }
       return result;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -117,6 +129,9 @@ export function registerAudioIPC(
     try {
       const native = ensureAddon();
       const result = native.stopRecording();
+      if (result.ok) {
+        callbacks?.onRecordingStop?.();
+      }
       return result;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);

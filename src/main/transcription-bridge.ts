@@ -1,7 +1,10 @@
 import { ipcMain, BrowserWindow } from "electron";
 import { WhisperManager } from "./whisper-manager.js";
 import { ModelManager } from "./model-manager.js";
-import { TranscriptionService } from "./transcription-service.js";
+import {
+  TranscriptionService,
+  type TranscriptSegmentCallback,
+} from "./transcription-service.js";
 
 export function createTranscriptionServices() {
   const whisperManager = new WhisperManager();
@@ -19,6 +22,7 @@ export function registerTranscriptionIPC(
   whisperManager: WhisperManager,
   modelManager: ModelManager,
   transcriptionService: TranscriptionService,
+  onSegment?: TranscriptSegmentCallback,
 ): void {
   function sendToRenderer(channel: string, data: unknown): void {
     const win = getMainWindow();
@@ -30,6 +34,7 @@ export function registerTranscriptionIPC(
   // Wire up transcription callbacks to IPC
   transcriptionService.setSegmentCallback((segment) => {
     sendToRenderer("transcription:segment", segment);
+    onSegment?.(segment);
   });
 
   transcriptionService.setStatusCallback((status) => {

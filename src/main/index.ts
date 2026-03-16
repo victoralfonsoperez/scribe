@@ -6,6 +6,10 @@ import {
   createTranscriptionServices,
   registerTranscriptionIPC,
 } from "./transcription-bridge.js";
+import { initDatabase, closeDatabase } from "./database.js";
+import { MeetingRepository } from "./meeting-repository.js";
+import { MeetingService } from "./meeting-service.js";
+import { registerMeetingIPC } from "./meeting-bridge.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -40,28 +44,49 @@ const createWindow = () => {
 
 ipcMain.handle("get-version", () => app.getVersion());
 
+// Initialize database
+const db = initDatabase();
+const meetingRepo = new MeetingRepository(db);
+const meetingService = new MeetingService(meetingRepo);
+
 // Set up transcription services
 const { whisperManager, modelManager, transcriptionService } =
   createTranscriptionServices();
 
-// Register audio IPC with segment callback for transcription
-registerAudioIPC(() => mainWindow, (segment) => {
-  transcriptionService.enqueue(segment.path, segment.index);
+// Register audio IPC with callbacks for meeting lifecycle
+registerAudioIPC(() => mainWindow, {
+  onSegment: (segment) => {
+    transcriptionService.enqueue(segment.path, segment.index);
+  },
+  onRecordingStart: (sessionDir) => {
+    meetingService.startMeeting(sessionDir);
+    transcriptionService.clearSegments();
+  },
+  onRecordingStop: () => {
+    meetingService.endMeeting();
+  },
 });
 
-// Register transcription IPC handlers
+// Register transcription IPC handlers (with meeting segment persistence)
 registerTranscriptionIPC(
   () => mainWindow,
   whisperManager,
   modelManager,
   transcriptionService,
+  (segment) => {
+    meetingService.addSegment(segment);
+  },
 );
+
+// Register meeting IPC handlers
+registerMeetingIPC(meetingService, meetingRepo);
 
 app.whenReady().then(createWindow);
 
 app.on("window-all-closed", () => {
   mainWindow = null;
   transcriptionService.stop();
+  closeDatabase();
   app.quit();
 });
 

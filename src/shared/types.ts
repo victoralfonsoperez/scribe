@@ -50,6 +50,49 @@ export interface WhisperInstallProgress {
   status: string;
 }
 
+// Meeting types
+export interface Meeting {
+  id: string;
+  title: string;
+  startedAt: number;
+  endedAt: number | null;
+  durationSeconds: number | null;
+  sessionDir: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface MeetingListItem {
+  id: string;
+  title: string;
+  startedAt: number;
+  endedAt: number | null;
+  durationSeconds: number | null;
+  segmentCount: number;
+}
+
+export interface MeetingDetail {
+  meeting: Meeting;
+  segments: TranscriptSegment[];
+}
+
+export interface SearchResultMatch {
+  segmentId: string;
+  segmentIndex: number;
+  startTime: number;
+  endTime: number;
+  text: string;
+}
+
+export interface SearchResultGroup {
+  meetingId: string;
+  meetingTitle: string;
+  startedAt: number;
+  matches: SearchResultMatch[];
+}
+
+export type ExportFormat = "markdown" | "text";
+
 export interface ScribeAPI {
   getVersion: () => Promise<string>;
   startRecording: () => Promise<{ ok: boolean; error?: string }>;
@@ -80,6 +123,22 @@ export interface ScribeAPI {
   onModelDownloadProgress: (
     callback: (progress: ModelDownloadProgress) => void,
   ) => () => void;
+
+  // Meetings
+  listMeetings: () => Promise<MeetingListItem[]>;
+  getMeeting: (id: string) => Promise<MeetingDetail | null>;
+  renameMeeting: (
+    id: string,
+    title: string,
+  ) => Promise<{ ok: boolean; error?: string }>;
+  deleteMeeting: (
+    id: string,
+  ) => Promise<{ ok: boolean; error?: string }>;
+  searchMeetings: (query: string) => Promise<SearchResultGroup[]>;
+  exportMeeting: (
+    id: string,
+    format: ExportFormat,
+  ) => Promise<string | null>;
 
   // Whisper binary
   getWhisperStatus: () => Promise<{
