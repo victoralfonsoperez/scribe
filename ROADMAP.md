@@ -117,14 +117,14 @@ System audio┘       │                         │                           
 
 ## Key decisions
 
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| App framework | Electron | Web dev friendly, large ecosystem, proven |
-| Transcription | whisper.cpp (local) | Free, private, no internet required |
-| Summarization | Claude API | Best quality; Ollama as offline fallback |
-| Storage | SQLite + filesystem | Simple, portable, no external DB |
-| Audio capture | ScreenCaptureKit | Only supported way for system audio on modern macOS |
-| Native bridge | node-addon-api | Stable, well-documented, good DX |
+| Decision      | Choice              | Rationale                                           |
+| ------------- | ------------------- | --------------------------------------------------- |
+| App framework | Electron            | Web dev friendly, large ecosystem, proven           |
+| Transcription | whisper.cpp (local) | Free, private, no internet required                 |
+| Summarization | Claude API          | Best quality; Ollama as offline fallback            |
+| Storage       | SQLite + filesystem | Simple, portable, no external DB                    |
+| Audio capture | ScreenCaptureKit    | Only supported way for system audio on modern macOS |
+| Native bridge | node-addon-api      | Stable, well-documented, good DX                    |
 
 ## Build order rationale
 
