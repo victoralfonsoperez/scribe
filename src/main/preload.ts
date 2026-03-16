@@ -44,6 +44,17 @@ const api: ScribeAPI = {
   onModelDownloadProgress: (callback) =>
     onEvent("model:download-progress", callback),
 
+  // Summaries
+  generateSummary: (meetingId, promptKey) =>
+    ipcRenderer.invoke("summary:generate", meetingId, promptKey),
+  listSummaries: (meetingId) =>
+    ipcRenderer.invoke("summary:list", meetingId),
+  deleteSummary: (id) => ipcRenderer.invoke("summary:delete", id),
+  getSummarySettings: () => ipcRenderer.invoke("summary:get-settings"),
+  setSummarySettings: (settings) =>
+    ipcRenderer.invoke("summary:set-settings", settings),
+  onSummaryStatus: (callback) => onEvent("summary:status", callback),
+
   // Whisper binary
   getWhisperStatus: () => ipcRenderer.invoke("whisper:status"),
   installWhisper: () => ipcRenderer.invoke("whisper:install"),

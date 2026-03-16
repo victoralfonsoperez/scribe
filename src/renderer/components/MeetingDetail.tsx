@@ -1,12 +1,16 @@
 import { useCallback, useState } from "react";
 import type { ExportFormat } from "../../shared/types.js";
 import { useMeetingDetail } from "../hooks/useMeetings.js";
+import { useSummary } from "../hooks/useSummary.js";
 import TranscriptView from "./TranscriptView.js";
+import SummaryView from "./SummaryView.js";
 
 interface MeetingDetailProps {
   meetingId: string;
   onBack: () => void;
 }
+
+type Tab = "transcript" | "summary";
 
 function formatDate(timestamp: number): string {
   return new Date(timestamp).toLocaleString("en-US", {
@@ -33,6 +37,13 @@ export default function MeetingDetail({
   onBack,
 }: MeetingDetailProps) {
   const { detail, loading } = useMeetingDetail(meetingId);
+  const {
+    summaries,
+    status: summaryStatus,
+    generate,
+    deleteSummary,
+  } = useSummary(meetingId);
+  const [tab, setTab] = useState<Tab>("transcript");
   const [exporting, setExporting] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -101,30 +112,65 @@ export default function MeetingDetail({
           </div>
         </div>
 
-        {/* Export buttons */}
-        <div className="flex shrink-0 gap-2">
-          {copied && (
-            <span className="text-xs text-green-400">Copied!</span>
-          )}
-          <button
-            onClick={() => handleExport("markdown")}
-            disabled={exporting}
-            className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:bg-gray-800 hover:text-white disabled:opacity-50"
-          >
-            Copy MD
-          </button>
-          <button
-            onClick={() => handleExport("text")}
-            disabled={exporting}
-            className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:bg-gray-800 hover:text-white disabled:opacity-50"
-          >
-            Copy Text
-          </button>
-        </div>
+        {/* Export buttons (only in transcript tab) */}
+        {tab === "transcript" && (
+          <div className="flex shrink-0 gap-2">
+            {copied && (
+              <span className="text-xs text-green-400">Copied!</span>
+            )}
+            <button
+              onClick={() => handleExport("markdown")}
+              disabled={exporting}
+              className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:bg-gray-800 hover:text-white disabled:opacity-50"
+            >
+              Copy MD
+            </button>
+            <button
+              onClick={() => handleExport("text")}
+              disabled={exporting}
+              className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:bg-gray-800 hover:text-white disabled:opacity-50"
+            >
+              Copy Text
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Transcript (reuse existing TranscriptView) */}
-      <TranscriptView segments={segments} status={{ state: "idle" }} />
+      {/* Tab switcher */}
+      <div className="flex border-b border-gray-800 px-4">
+        <button
+          onClick={() => setTab("transcript")}
+          className={`border-b-2 px-3 py-2 text-xs font-medium transition-colors ${
+            tab === "transcript"
+              ? "border-blue-500 text-white"
+              : "border-transparent text-gray-500 hover:text-gray-300"
+          }`}
+        >
+          Transcript
+        </button>
+        <button
+          onClick={() => setTab("summary")}
+          className={`border-b-2 px-3 py-2 text-xs font-medium transition-colors ${
+            tab === "summary"
+              ? "border-blue-500 text-white"
+              : "border-transparent text-gray-500 hover:text-gray-300"
+          }`}
+        >
+          Summary
+        </button>
+      </div>
+
+      {/* Tab content */}
+      {tab === "transcript" ? (
+        <TranscriptView segments={segments} status={{ state: "idle" }} />
+      ) : (
+        <SummaryView
+          summaries={summaries}
+          status={summaryStatus}
+          onGenerate={generate}
+          onDelete={deleteSummary}
+        />
+      )}
     </div>
   );
 }

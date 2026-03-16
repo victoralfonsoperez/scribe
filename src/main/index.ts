@@ -10,6 +10,9 @@ import { initDatabase, closeDatabase } from "./database.js";
 import { MeetingRepository } from "./meeting-repository.js";
 import { MeetingService } from "./meeting-service.js";
 import { registerMeetingIPC } from "./meeting-bridge.js";
+import { LLMClient } from "./llm-client.js";
+import { SummaryService } from "./summary-service.js";
+import { registerSummaryIPC } from "./summary-bridge.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -80,6 +83,11 @@ registerTranscriptionIPC(
 
 // Register meeting IPC handlers
 registerMeetingIPC(meetingService, meetingRepo);
+
+// Set up summary services
+const llmClient = new LLMClient();
+const summaryService = new SummaryService(llmClient, meetingRepo);
+registerSummaryIPC(summaryService, () => mainWindow);
 
 app.whenReady().then(createWindow);
 

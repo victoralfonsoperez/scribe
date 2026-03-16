@@ -3,6 +3,7 @@ import type {
   WhisperModelInfo,
   ModelDownloadProgress,
 } from "../../shared/types.js";
+import SummarySettings from "./SummarySettings.js";
 
 interface ModelSelectorProps {
   onClose: () => void;
@@ -232,6 +233,12 @@ export default function ModelSelector({ onClose }: ModelSelectorProps) {
         {error && (
           <p className="mt-3 text-xs text-red-400">{error}</p>
         )}
+
+        {/* Divider */}
+        <div className="my-5 border-t border-gray-800" />
+
+        {/* Summary settings */}
+        <SummarySettings onClose={onClose} />
       </div>
     </div>
   );

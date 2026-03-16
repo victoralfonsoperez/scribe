@@ -15,7 +15,12 @@ export default defineConfig({
           build: {
             outDir: "dist-electron/main",
             rollupOptions: {
-              external: ["electron", "better-sqlite3", /\.node$/],
+              external: [
+                "electron",
+                "better-sqlite3",
+                "@anthropic-ai/sdk",
+                /\.node$/,
+              ],
             },
           },
         },
@@ -30,6 +35,7 @@ export default defineConfig({
             outDir: "dist-electron/preload",
             lib: {
               formats: ["cjs"],
+              fileName: () => "preload.js",
             },
             rollupOptions: {
               external: ["electron"],

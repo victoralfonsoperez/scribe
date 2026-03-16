@@ -1,5 +1,5 @@
 import type Database from "better-sqlite3";
-import type { TranscriptSegment } from "../shared/types.js";
+import type { TranscriptSegment, Summary } from "../shared/types.js";
 
 export interface MeetingRow {
   id: string;
@@ -20,6 +20,15 @@ export interface SegmentRow {
   end_time: number;
   text: string;
   timestamp: number;
+}
+
+export interface SummaryRow {
+  id: string;
+  meeting_id: string;
+  prompt: string;
+  content: string;
+  model: string;
+  created_at: number;
 }
 
 export interface SearchResultRow {
@@ -70,6 +79,16 @@ export class MeetingRepository {
       `),
       getSegments: this.db.prepare(`
         SELECT * FROM segments WHERE meeting_id = ? ORDER BY segment_index ASC
+      `),
+      insertSummary: this.db.prepare(`
+        INSERT INTO summaries (id, meeting_id, prompt, content, model, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `),
+      getSummaries: this.db.prepare(`
+        SELECT * FROM summaries WHERE meeting_id = ? ORDER BY created_at DESC
+      `),
+      deleteSummary: this.db.prepare(`
+        DELETE FROM summaries WHERE id = ?
       `),
       searchSegments: this.db.prepare(`
         SELECT
@@ -134,6 +153,25 @@ export class MeetingRepository {
 
   getSegments(meetingId: string): SegmentRow[] {
     return this.stmts.getSegments.all(meetingId) as SegmentRow[];
+  }
+
+  addSummary(summary: Summary): void {
+    this.stmts.insertSummary.run(
+      summary.id,
+      summary.meetingId,
+      summary.prompt,
+      summary.content,
+      summary.model,
+      summary.createdAt,
+    );
+  }
+
+  getSummaries(meetingId: string): SummaryRow[] {
+    return this.stmts.getSummaries.all(meetingId) as SummaryRow[];
+  }
+
+  deleteSummary(id: string): void {
+    this.stmts.deleteSummary.run(id);
   }
 
   searchSegments(query: string): SearchResultRow[] {
