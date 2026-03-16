@@ -53,8 +53,14 @@ function getSessionDir(): string {
   return dir;
 }
 
+export type OnSegmentCallback = (segment: {
+  path: string;
+  index: number;
+}) => void;
+
 export function registerAudioIPC(
   getMainWindow: () => BrowserWindow | null,
+  onSegment?: OnSegmentCallback,
 ): void {
   let addon: NativeAddon | null = null;
 
@@ -86,6 +92,7 @@ export function registerAudioIPC(
 
     native.setSegmentCallback((segment) => {
       sendToRenderer("recording:segment", segment);
+      onSegment?.(segment);
     });
   }
 

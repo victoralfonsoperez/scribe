@@ -2,6 +2,10 @@ import { app, BrowserWindow, ipcMain } from "electron";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { registerAudioIPC } from "./audio-bridge.js";
+import {
+  createTranscriptionServices,
+  registerTranscriptionIPC,
+} from "./transcription-bridge.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -36,12 +40,28 @@ const createWindow = () => {
 
 ipcMain.handle("get-version", () => app.getVersion());
 
-registerAudioIPC(() => mainWindow);
+// Set up transcription services
+const { whisperManager, modelManager, transcriptionService } =
+  createTranscriptionServices();
+
+// Register audio IPC with segment callback for transcription
+registerAudioIPC(() => mainWindow, (segment) => {
+  transcriptionService.enqueue(segment.path, segment.index);
+});
+
+// Register transcription IPC handlers
+registerTranscriptionIPC(
+  () => mainWindow,
+  whisperManager,
+  modelManager,
+  transcriptionService,
+);
 
 app.whenReady().then(createWindow);
 
 app.on("window-all-closed", () => {
   mainWindow = null;
+  transcriptionService.stop();
   app.quit();
 });
 
