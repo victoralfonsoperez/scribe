@@ -5,6 +5,7 @@ import {
   TranscriptionService,
   type TranscriptSegmentCallback,
 } from "./transcription-service.js";
+import { notify } from "./notify.js";
 
 export function createTranscriptionServices() {
   const whisperManager = new WhisperManager();
@@ -17,13 +18,21 @@ export function createTranscriptionServices() {
   return { whisperManager, modelManager, transcriptionService };
 }
 
+export interface TranscriptionBridgeControls {
+  onRecordingStart: () => void;
+  onRecordingStop: () => void;
+}
+
 export function registerTranscriptionIPC(
   getMainWindow: () => BrowserWindow | null,
   whisperManager: WhisperManager,
   modelManager: ModelManager,
   transcriptionService: TranscriptionService,
   onSegment?: TranscriptSegmentCallback,
-): void {
+): TranscriptionBridgeControls {
+  let recordingStopped = false;
+  let segmentCount = 0;
+
   function sendToRenderer(channel: string, data: unknown): void {
     const win = getMainWindow();
     if (win && !win.isDestroyed()) {
@@ -34,11 +43,21 @@ export function registerTranscriptionIPC(
   // Wire up transcription callbacks to IPC
   transcriptionService.setSegmentCallback((segment) => {
     sendToRenderer("transcription:segment", segment);
+    segmentCount++;
     onSegment?.(segment);
   });
 
   transcriptionService.setStatusCallback((status) => {
     sendToRenderer("transcription:status", status);
+
+    // Notify when transcription finishes after recording has stopped
+    if (status.state === "idle" && recordingStopped && segmentCount > 0) {
+      notify(
+        "Transcription Complete",
+        `Transcribed ${segmentCount} segment${segmentCount === 1 ? "" : "s"}.`,
+        getMainWindow(),
+      );
+    }
   });
 
   // Transcription handlers
@@ -93,4 +112,14 @@ export function registerTranscriptionIPC(
     whisperManager.setProgressCallback(null);
     return result;
   });
+
+  return {
+    onRecordingStart: () => {
+      recordingStopped = false;
+      segmentCount = 0;
+    },
+    onRecordingStop: () => {
+      recordingStopped = true;
+    },
+  };
 }

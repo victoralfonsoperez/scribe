@@ -30,6 +30,9 @@ const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
+    icon: app.isPackaged
+      ? path.join(process.resourcesPath, "icon.png")
+      : path.join(__dirname, "../../build/icon.png"),
     titleBarStyle: "hiddenInset",
     webPreferences: {
       preload: path.join(__dirname, "../preload/preload.js"),
@@ -56,22 +59,8 @@ const meetingService = new MeetingService(meetingRepo);
 const { whisperManager, modelManager, transcriptionService } =
   createTranscriptionServices();
 
-// Register audio IPC with callbacks for meeting lifecycle
-registerAudioIPC(() => mainWindow, {
-  onSegment: (segment) => {
-    transcriptionService.enqueue(segment.path, segment.index);
-  },
-  onRecordingStart: (sessionDir) => {
-    meetingService.startMeeting(sessionDir);
-    transcriptionService.clearSegments();
-  },
-  onRecordingStop: () => {
-    meetingService.endMeeting();
-  },
-});
-
 // Register transcription IPC handlers (with meeting segment persistence)
-registerTranscriptionIPC(
+const transcriptionControls = registerTranscriptionIPC(
   () => mainWindow,
   whisperManager,
   modelManager,
@@ -81,6 +70,22 @@ registerTranscriptionIPC(
   },
 );
 
+// Register audio IPC with callbacks for meeting lifecycle
+registerAudioIPC(() => mainWindow, {
+  onSegment: (segment) => {
+    transcriptionService.enqueue(segment.path, segment.index);
+  },
+  onRecordingStart: (sessionDir) => {
+    meetingService.startMeeting(sessionDir);
+    transcriptionService.clearSegments();
+    transcriptionControls.onRecordingStart();
+  },
+  onRecordingStop: () => {
+    meetingService.endMeeting();
+    transcriptionControls.onRecordingStop();
+  },
+});
+
 // Register meeting IPC handlers
 registerMeetingIPC(meetingService, meetingRepo);
 
@@ -89,7 +94,19 @@ const llmClient = new LLMClient();
 const summaryService = new SummaryService(llmClient, meetingRepo);
 registerSummaryIPC(summaryService, () => mainWindow);
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  if (process.platform === "darwin") {
+    const iconPath = app.isPackaged
+      ? path.join(process.resourcesPath, "icon.png")
+      : path.join(__dirname, "../../build/icon.png");
+    try {
+      app.dock?.setIcon(iconPath);
+    } catch {
+      // Icon not found — continue with default
+    }
+  }
+  createWindow();
+});
 
 app.on("window-all-closed", () => {
   mainWindow = null;

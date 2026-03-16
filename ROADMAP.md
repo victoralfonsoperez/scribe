@@ -96,14 +96,15 @@ The feature that turns a wall of text into something useful.
 
 Make it feel like a real app.
 
-- [ ] Menu bar / tray icon with quick recording toggle
-- [ ] Global keyboard shortcut to start/stop
-- [ ] Notification when transcription completes
-- [ ] Meeting auto-detection (optional — detect when Meet/Teams window is active)
-- [ ] Drag-and-drop audio file import (transcribe existing recordings)
-- [ ] Auto-update via electron-updater
-- [ ] App icon and branding
-- [ ] Light/dark theme support
+- [x] App icon and branding
+- [x] Notification when transcription completes
+- [x] Notification when summary generation completes
+- [ ] Menu bar / tray icon with quick recording toggle *(deferred)*
+- [ ] Global keyboard shortcut to start/stop *(deferred)*
+- [ ] Meeting auto-detection (optional — detect when Meet/Teams window is active) *(deferred)*
+- [ ] Drag-and-drop audio file import (transcribe existing recordings) *(deferred)*
+- [ ] Auto-update via electron-updater *(deferred)*
+- [ ] Light/dark theme support *(deferred)*
 
 ## Data flow
 
