@@ -33,28 +33,28 @@
 
 ## Milestones
 
-### Phase 0 — Skeleton
+### Phase 0 — Skeleton ✅
 
 Set up the project foundation. Nothing functional yet, just a working dev loop.
 
-- [ ] Init Electron + Vite + React + TypeScript boilerplate
-- [ ] Configure Tailwind CSS
-- [ ] Set up electron-builder for macOS (dmg/zip)
-- [ ] Basic window with placeholder UI
-- [ ] Dev hot-reload working (renderer + main)
-- [ ] ESLint + Prettier config
+- [x] Init Electron + Vite + React + TypeScript boilerplate
+- [x] Configure Tailwind CSS
+- [x] Set up electron-builder for macOS (dmg/zip)
+- [x] Basic window with placeholder UI
+- [x] Dev hot-reload working (renderer + main)
+- [x] ESLint + Prettier config
 
-### Phase 1 — Audio capture (proof of concept)
+### Phase 1 — Audio capture (proof of concept) ✅
 
 The highest-risk piece. Validate that system audio capture works before building anything else.
 
-- [ ] Build native addon (node-addon-api + Objective-C++)
-- [ ] Capture microphone audio via CoreAudio → PCM buffer
-- [ ] Capture system/app audio via ScreenCaptureKit → PCM buffer
-- [ ] Mix both streams into a single buffer
-- [ ] Write PCM chunks to WAV files (30s segments)
-- [ ] Request and handle macOS permissions (microphone, screen recording)
-- [ ] Basic UI: start/stop recording button, audio level indicator
+- [x] Build native addon (node-addon-api + Objective-C++)
+- [x] Capture microphone audio via CoreAudio → PCM buffer
+- [x] Capture system/app audio via ScreenCaptureKit → PCM buffer
+- [x] Mix both streams into a single buffer
+- [x] Write PCM chunks to WAV files (30s segments)
+- [x] Request and handle macOS permissions (microphone, screen recording)
+- [x] Basic UI: start/stop recording button, audio level indicator
 
 ### Phase 2 — Transcription
 

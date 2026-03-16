@@ -1,6 +1,7 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { registerAudioIPC } from "./audio-bridge.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -32,6 +33,10 @@ const createWindow = () => {
     mainWindow.loadFile(path.join(process.env.DIST!, "index.html"));
   }
 };
+
+ipcMain.handle("get-version", () => app.getVersion());
+
+registerAudioIPC(() => mainWindow);
 
 app.whenReady().then(createWindow);
 
