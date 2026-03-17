@@ -60,6 +60,12 @@ const api: ScribeAPI = {
   installWhisper: () => ipcRenderer.invoke("whisper:install"),
   onWhisperInstallProgress: (callback) =>
     onEvent("whisper:install-progress", callback),
+
+  // Tray
+  sendTrayRecordingState: (recording) =>
+    ipcRenderer.send("tray:recording-state", recording),
+  onTrayToggleRecording: (callback) =>
+    onEvent("tray:toggle-recording", callback),
 };
 
 contextBridge.exposeInMainWorld("scribe", api);

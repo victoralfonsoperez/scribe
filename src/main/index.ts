@@ -13,6 +13,7 @@ import { registerMeetingIPC } from "./meeting-bridge.js";
 import { LLMClient } from "./llm-client.js";
 import { SummaryService } from "./summary-service.js";
 import { registerSummaryIPC } from "./summary-bridge.js";
+import { createTray, destroyTray } from "./tray.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -106,12 +107,14 @@ app.whenReady().then(() => {
     }
   }
   createWindow();
+  createTray(() => mainWindow);
 });
 
 app.on("window-all-closed", () => {
   mainWindow = null;
   transcriptionService.stop();
   closeDatabase();
+  destroyTray();
   app.quit();
 });
 
