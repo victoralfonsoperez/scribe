@@ -183,4 +183,8 @@ export interface ScribeAPI {
   onWhisperInstallProgress: (
     callback: (progress: WhisperInstallProgress) => void,
   ) => () => void;
+
+  // Tray
+  sendTrayRecordingState: (recording: boolean) => void;
+  onTrayToggleRecording: (callback: () => void) => () => void;
 }

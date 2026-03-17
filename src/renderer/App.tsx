@@ -22,32 +22,12 @@ function App() {
     null,
   );
   const cleanupRefs = useRef<(() => void)[]>([]);
+  const handleClickRef = useRef<() => void>(() => {});
   const {
     segments,
     status: transcriptionStatus,
     clearSegments,
   } = useTranscription();
-
-  useEffect(() => {
-    const unsub1 = window.scribe.onRecordingStatus((status) => {
-      setState(status.state);
-      if (status.error) setError(status.error);
-    });
-
-    const unsub2 = window.scribe.onAudioLevel(({ rms }) => {
-      setLevel(rms);
-    });
-
-    const unsub3 = window.scribe.onAudioSegment(() => {
-      setSegmentCount((c) => c + 1);
-    });
-
-    cleanupRefs.current = [unsub1, unsub2, unsub3];
-
-    return () => {
-      cleanupRefs.current.forEach((fn) => fn());
-    };
-  }, []);
 
   const handleClick = useCallback(async () => {
     setError(null);
@@ -75,6 +55,33 @@ function App() {
     }
   }, [state, clearSegments]);
 
+  handleClickRef.current = handleClick;
+
+  useEffect(() => {
+    const unsub1 = window.scribe.onRecordingStatus((status) => {
+      setState(status.state);
+      if (status.error) setError(status.error);
+    });
+
+    const unsub2 = window.scribe.onAudioLevel(({ rms }) => {
+      setLevel(rms);
+    });
+
+    const unsub3 = window.scribe.onAudioSegment(() => {
+      setSegmentCount((c) => c + 1);
+    });
+
+    const unsub4 = window.scribe.onTrayToggleRecording(() => {
+      handleClickRef.current();
+    });
+
+    cleanupRefs.current = [unsub1, unsub2, unsub3, unsub4];
+
+    return () => {
+      cleanupRefs.current.forEach((fn) => fn());
+    };
+  }, []);
+
   const handleSelectMeeting = useCallback((id: string) => {
     setSelectedMeetingId(id);
     setView("meeting");
@@ -86,6 +93,11 @@ function App() {
   }, []);
 
   const isRecording = state === "recording" || state === "stopping";
+
+  // Sync recording state to tray icon
+  useEffect(() => {
+    window.scribe.sendTrayRecordingState(state === "recording");
+  }, [state]);
 
   return (
     <div className="flex h-screen flex-col bg-gray-950 text-white">

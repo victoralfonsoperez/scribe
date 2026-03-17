@@ -99,12 +99,28 @@ Make it feel like a real app.
 - [x] App icon and branding
 - [x] Notification when transcription completes
 - [x] Notification when summary generation completes
-- [ ] Menu bar / tray icon with quick recording toggle *(deferred)*
+- [x] Menu bar / tray icon with quick recording toggle
 - [ ] Global keyboard shortcut to start/stop *(deferred)*
 - [ ] Meeting auto-detection (optional — detect when Meet/Teams window is active) *(deferred)*
 - [ ] Drag-and-drop audio file import (transcribe existing recordings) *(deferred)*
 - [ ] Auto-update via electron-updater *(deferred)*
 - [ ] Light/dark theme support *(deferred)*
+
+### Phase 6 — Speaker Diarization (WhisperX)
+
+Identify *who* said *what* using WhisperX + pyannote.audio as a post-recording step. Keep whisper.cpp for live transcription.
+
+- [ ] Bundle Python environment (micromamba/conda sidecar) for WhisperX runtime
+- [ ] Install WhisperX + dependencies (faster-whisper, pyannote.audio, PyTorch)
+- [ ] Settings UI for Hugging Face access token (required for pyannote diarization models)
+- [ ] New `DiarizationService` — runs WhisperX on full audio after recording stops
+- [ ] Add `speaker` field to `TranscriptSegment` type and SQLite schema
+- [ ] Post-recording flow: merge diarization results back into existing transcript segments
+- [ ] Transcript UI: color-coded speaker labels per segment
+- [ ] Speaker name editing (map "Speaker 1" → "Alice")
+- [ ] Include speaker attribution in summary prompts for better summaries
+
+**Approach**: Hybrid — whisper.cpp handles real-time 30-second chunk transcription during recording. After recording stops, WhisperX processes the full audio for speaker diarization, then merges speaker labels into the existing segments. This gives pyannote full audio context for accurate speaker identification without replacing the live transcription pipeline.
 
 ## Data flow
 
@@ -133,7 +149,7 @@ Phase 1 (audio) comes first because it's the highest-risk component. If system a
 
 ## Open questions
 
-- Speaker diarization: whisper.cpp has limited support — worth exploring whisperX or pyannote for identifying who said what
-- Real-time vs batch transcription: start with batch (simpler), move to streaming later
+- Speaker diarization: planned in Phase 6 — hybrid approach with WhisperX post-processing
+- Real-time vs batch transcription: using hybrid (live whisper.cpp + batch WhisperX diarization)
 - Meeting title: auto-generate from first few minutes of transcript via LLM?
 - Multi-language support: Whisper handles this natively, but summary prompts may need adjustment
