@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Summary, SummaryStatus } from "../../shared/types.js";
 
 interface SummaryViewProps {
@@ -57,9 +57,29 @@ export default function SummaryView({
 }: SummaryViewProps) {
   const [showPromptMenu, setShowPromptMenu] = useState(false);
   const [copied, setCopied] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const latestSummary = summaries[0] ?? null;
   const isGenerating = status.state === "generating";
+
+  // Close prompt menu on outside click or Escape
+  useEffect(() => {
+    if (!showPromptMenu) return;
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setShowPromptMenu(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowPromptMenu(false);
+    };
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showPromptMenu]);
 
   const handleCopy = useCallback(async () => {
     if (!latestSummary) return;
@@ -102,19 +122,37 @@ export default function SummaryView({
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* Toolbar */}
-      <div className="flex items-center gap-2 border-b border-gray-800 px-4 py-2">
-        <div className="relative">
+      <div className="flex items-center gap-2 border-b border-gray-800 px-4 py-3">
+        <div className="relative" ref={menuRef}>
           <button
             onClick={() => setShowPromptMenu(!showPromptMenu)}
-            className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:bg-gray-800 hover:text-white"
+            aria-expanded={showPromptMenu}
+            aria-haspopup="true"
+            className="flex items-center gap-1 rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:bg-gray-800 hover:text-white"
           >
             Re-summarize
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 16 16"
+              fill="currentColor"
+              className={`h-3 w-3 transition-transform ${showPromptMenu ? "rotate-180" : ""}`}
+            >
+              <path
+                fillRule="evenodd"
+                d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z"
+                clipRule="evenodd"
+              />
+            </svg>
           </button>
           {showPromptMenu && (
-            <div className="absolute top-full left-0 z-10 mt-1 rounded-lg border border-gray-700 bg-gray-900 py-1 shadow-lg">
+            <div
+              className="absolute top-full left-0 z-10 mt-1 rounded-lg border border-gray-700 bg-gray-900 py-1 shadow-lg"
+              role="menu"
+            >
               {PROMPT_OPTIONS.map((opt) => (
                 <button
                   key={opt.key}
+                  role="menuitem"
                   onClick={() => {
                     setShowPromptMenu(false);
                     onGenerate(opt.key);
@@ -133,7 +171,7 @@ export default function SummaryView({
           onClick={handleCopy}
           className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:bg-gray-800 hover:text-white"
         >
-          Copy Summary
+          Copy
         </button>
 
         <button
@@ -143,8 +181,8 @@ export default function SummaryView({
           Delete
         </button>
 
-        <span className="ml-auto text-xs text-gray-600">
-          {latestSummary.model} · {latestSummary.prompt}
+        <span className="ml-auto truncate text-xs text-gray-500">
+          via {latestSummary.model}
         </span>
       </div>
 
@@ -155,7 +193,7 @@ export default function SummaryView({
       )}
 
       {/* Summary content */}
-      <div className="flex-1 overflow-y-auto px-4 py-3">
+      <div className="flex-1 overflow-y-auto px-4 py-4">
         {formatSummaryContent(latestSummary.content)}
       </div>
     </div>

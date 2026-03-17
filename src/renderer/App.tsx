@@ -131,6 +131,7 @@ function App() {
           </div>
           <button
             onClick={() => setShowSettings(true)}
+            aria-label="Settings"
             className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-800 hover:text-white"
           >
             <svg
@@ -152,39 +153,62 @@ function App() {
       {/* Recording view */}
       {view === "recording" && (
         <>
-          {/* Controls Bar */}
-          <div className="flex items-center gap-4 border-b border-gray-800 px-4 py-3">
-            <RecordButton state={state} onClick={handleClick} />
-
-            <div className="flex-1">
-              <AudioLevelMeter level={level} />
-              <div className="mt-1 flex items-center gap-2">
-                <p className="text-xs font-medium text-gray-400">
-                  {state === "idle" && "Ready to record"}
-                  {state === "recording" && "Recording..."}
-                  {state === "stopping" && "Stopping..."}
-                  {state === "error" && "Error occurred"}
-                </p>
-                {state === "recording" && segmentCount > 0 && (
-                  <span className="text-xs text-gray-500">
-                    · {segmentCount} segment{segmentCount !== 1 ? "s" : ""}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
           {error && (
             <div className="border-b border-red-900/50 bg-red-950/30 px-4 py-2">
               <p className="text-xs text-red-400">{error}</p>
             </div>
           )}
 
-          {/* Transcript View */}
-          <TranscriptView
-            segments={segments}
-            status={transcriptionStatus}
-          />
+          {/* Idle state — prominent centered CTA */}
+          {(state === "idle" || state === "error") &&
+            segments.length === 0 && (
+              <div className="flex flex-1 flex-col items-center justify-center gap-5">
+                <RecordButton
+                  state={state}
+                  onClick={handleClick}
+                  size="large"
+                />
+                <p className="text-sm text-gray-500">
+                  {state === "error"
+                    ? "Something went wrong. Try again."
+                    : "Press to start recording"}
+                </p>
+              </div>
+            )}
+
+          {/* Active / has-transcript state — compact toolbar */}
+          {(state === "recording" ||
+            state === "stopping" ||
+            segments.length > 0) && (
+            <>
+              <div className="flex items-center gap-4 border-b border-gray-800 px-4 py-3">
+                <RecordButton state={state} onClick={handleClick} />
+
+                <div className="min-w-0 flex-1">
+                  <AudioLevelMeter level={level} />
+                  <div className="mt-1 flex items-center gap-2">
+                    <p className="text-xs font-medium text-gray-400">
+                      {state === "idle" && "Recording complete"}
+                      {state === "recording" && "Recording..."}
+                      {state === "stopping" && "Stopping..."}
+                      {state === "error" && "Recording failed"}
+                    </p>
+                    {state === "recording" && segmentCount > 0 && (
+                      <span className="text-xs text-gray-500">
+                        · {segmentCount} chunk
+                        {segmentCount !== 1 ? "s" : ""} captured
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <TranscriptView
+                segments={segments}
+                status={transcriptionStatus}
+              />
+            </>
+          )}
         </>
       )}
 

@@ -17,9 +17,12 @@ export default function AudioLevelMeter({ level }: AudioLevelMeterProps) {
 
   return (
     <div
-      className="flex h-4 w-64 items-end gap-0.5"
+      className="flex h-4 items-end gap-0.5"
       role="meter"
-      aria-valuenow={level}
+      aria-label="Audio input level"
+      aria-valuemin={0}
+      aria-valuemax={1}
+      aria-valuenow={Math.round(level * 100) / 100}
     >
       {Array.from({ length: SEGMENT_COUNT }, (_, i) => {
         const isActive = i < activeCount;
