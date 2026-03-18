@@ -63,8 +63,8 @@ export default function MeetingDetail({
 
   if (loading || !detail) {
     return (
-      <div className="flex flex-1 items-center justify-center text-gray-500">
-        <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
+      <div className="flex flex-1 items-center justify-center text-text-tertiary">
+        <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-text-secondary border-t-transparent" />
         Loading meeting...
       </div>
     );
@@ -75,12 +75,12 @@ export default function MeetingDetail({
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* Header — meeting info + tabs in one bar */}
-      <div className="border-b border-gray-800">
+      <div className="border-b border-border-default">
         <div className="flex items-center gap-3 px-4 pt-3 pb-0">
           <button
             onClick={onBack}
             aria-label="Back to history"
-            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-800 hover:text-white"
+            className="rounded-lg p-1.5 text-text-secondary hover:bg-bg-hover hover:text-text-primary"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -96,10 +96,10 @@ export default function MeetingDetail({
             </svg>
           </button>
           <div className="min-w-0 flex-1">
-            <h2 className="truncate text-sm font-semibold text-white">
+            <h2 className="truncate text-sm font-semibold text-text-primary">
               {meeting.title}
             </h2>
-            <div className="flex items-center gap-2 text-xs text-gray-500">
+            <div className="flex items-center gap-2 text-xs text-text-tertiary">
               <span>{formatDate(meeting.startedAt)}</span>
               {meeting.durationSeconds && (
                 <>
@@ -123,14 +123,14 @@ export default function MeetingDetail({
               <button
                 onClick={() => handleExport("markdown")}
                 disabled={exporting}
-                className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:bg-gray-800 hover:text-white disabled:opacity-50"
+                className="rounded-lg border border-border-default px-3 py-1.5 text-xs text-text-secondary hover:bg-bg-hover hover:text-text-primary disabled:opacity-50"
               >
                 Markdown
               </button>
               <button
                 onClick={() => handleExport("text")}
                 disabled={exporting}
-                className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:bg-gray-800 hover:text-white disabled:opacity-50"
+                className="rounded-lg border border-border-default px-3 py-1.5 text-xs text-text-secondary hover:bg-bg-hover hover:text-text-primary disabled:opacity-50"
               >
                 Plain Text
               </button>
@@ -144,8 +144,8 @@ export default function MeetingDetail({
             onClick={() => setTab("transcript")}
             className={`border-b-2 px-3 py-2 text-xs font-medium transition-colors ${
               tab === "transcript"
-                ? "border-blue-500 text-white"
-                : "border-transparent text-gray-500 hover:text-gray-300"
+                ? "border-blue-500 text-text-primary"
+                : "border-transparent text-text-tertiary hover:text-text-secondary"
             }`}
           >
             Transcript
@@ -154,8 +154,8 @@ export default function MeetingDetail({
             onClick={() => setTab("summary")}
             className={`border-b-2 px-3 py-2 text-xs font-medium transition-colors ${
               tab === "summary"
-                ? "border-blue-500 text-white"
-                : "border-transparent text-gray-500 hover:text-gray-300"
+                ? "border-blue-500 text-text-primary"
+                : "border-transparent text-text-tertiary hover:text-text-secondary"
             }`}
           >
             Summary

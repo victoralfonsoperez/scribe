@@ -93,14 +93,14 @@ export default function SummarySettings({ onClose }: SummarySettingsProps) {
     <div className="space-y-4">
       {/* Provider toggle */}
       <div>
-        <label className="mb-1.5 block text-xs text-gray-500">Provider</label>
-        <div className="flex rounded-lg border border-gray-800 bg-gray-950 p-0.5">
+        <label className="mb-1.5 block text-xs text-text-tertiary">Provider</label>
+        <div className="flex rounded-lg border border-border-default bg-bg-primary p-0.5">
           <button
             onClick={() => updateSettings({ provider: "claude" })}
             className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
               settings.provider === "claude"
-                ? "bg-gray-700 text-white"
-                : "text-gray-400 hover:text-white"
+                ? "bg-bg-active text-text-primary"
+                : "text-text-secondary hover:text-text-primary"
             }`}
           >
             Claude API
@@ -109,8 +109,8 @@ export default function SummarySettings({ onClose }: SummarySettingsProps) {
             onClick={() => updateSettings({ provider: "ollama" })}
             className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
               settings.provider === "ollama"
-                ? "bg-gray-700 text-white"
-                : "text-gray-400 hover:text-white"
+                ? "bg-bg-active text-text-primary"
+                : "text-text-secondary hover:text-text-primary"
             }`}
           >
             Ollama
@@ -121,18 +121,18 @@ export default function SummarySettings({ onClose }: SummarySettingsProps) {
       {/* Provider-specific fields */}
       {settings.provider === "claude" ? (
         <div>
-          <label className="mb-1.5 block text-xs text-gray-500">API Key</label>
+          <label className="mb-1.5 block text-xs text-text-tertiary">API Key</label>
           <div className="relative">
             <input
               type={showApiKey ? "text" : "password"}
               value={settings.apiKey}
               onChange={(e) => updateSettings({ apiKey: e.target.value })}
               placeholder="sk-ant-..."
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 pr-14 text-xs text-white placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-lg border border-border-default bg-bg-tertiary px-3 py-2 pr-14 text-xs text-text-primary placeholder:text-text-tertiary focus:border-blue-500 focus:outline-none"
             />
             <button
               onClick={() => setShowApiKey(!showApiKey)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-1.5 py-0.5 text-xs text-gray-400 hover:text-gray-300"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-1.5 py-0.5 text-xs text-text-secondary hover:text-text-primary"
             >
               {showApiKey ? "Hide" : "Show"}
             </button>
@@ -141,23 +141,23 @@ export default function SummarySettings({ onClose }: SummarySettingsProps) {
       ) : (
         <>
           <div>
-            <label className="mb-1.5 block text-xs text-gray-500">URL</label>
+            <label className="mb-1.5 block text-xs text-text-tertiary">URL</label>
             <input
               type="text"
               value={settings.ollamaUrl}
               onChange={(e) => updateSettings({ ollamaUrl: e.target.value })}
               placeholder="http://localhost:11434"
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-xs text-white placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-lg border border-border-default bg-bg-tertiary px-3 py-2 text-xs text-text-primary placeholder:text-text-tertiary focus:border-blue-500 focus:outline-none"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs text-gray-500">Model</label>
+            <label className="mb-1.5 block text-xs text-text-tertiary">Model</label>
             <input
               type="text"
               value={settings.ollamaModel}
               onChange={(e) => updateSettings({ ollamaModel: e.target.value })}
               placeholder="llama3.2"
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-xs text-white placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-lg border border-border-default bg-bg-tertiary px-3 py-2 text-xs text-text-primary placeholder:text-text-tertiary focus:border-blue-500 focus:outline-none"
             />
           </div>
         </>
@@ -168,7 +168,7 @@ export default function SummarySettings({ onClose }: SummarySettingsProps) {
         <button
           onClick={handleTest}
           disabled={testing}
-          className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:bg-gray-800 hover:text-white disabled:opacity-50"
+          className="rounded-lg border border-border-default px-3 py-1.5 text-xs text-text-secondary hover:bg-bg-hover hover:text-text-primary disabled:opacity-50"
         >
           {testing ? "Testing..." : "Test Connection"}
         </button>
