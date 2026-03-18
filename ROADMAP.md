@@ -104,7 +104,7 @@ Make it feel like a real app.
 - [ ] Meeting auto-detection (optional — detect when Meet/Teams window is active) *(deferred)*
 - [ ] Drag-and-drop audio file import (transcribe existing recordings) *(deferred)*
 - [ ] Auto-update via electron-updater *(deferred)*
-- [ ] Light/dark theme support *(deferred)*
+- [x] Light/dark/system theme support
 
 ### Phase 6 — Speaker Diarization (WhisperX)
 
@@ -122,14 +122,37 @@ Identify *who* said *what* using WhisperX + pyannote.audio as a post-recording s
 
 **Approach**: Hybrid — whisper.cpp handles real-time 30-second chunk transcription during recording. After recording stops, WhisperX processes the full audio for speaker diarization, then merges speaker labels into the existing segments. This gives pyannote full audio context for accurate speaker identification without replacing the live transcription pipeline.
 
+### Phase 7 — Screenshot Capture (Meeting Notebook)
+
+Capture screenshots on demand during a meeting to build a visual record alongside the transcript. Think of Scribe as a meeting notebook — audio gives you the words, screenshots give you the slides, diagrams, and shared screens.
+
+- [ ] Add `screenshots` table in SQLite (id, meetingId, timestamp, filePath, caption)
+- [ ] Screenshot capture via ScreenCaptureKit — capture current screen on demand
+- [ ] Tray icon menu item: "Capture Screenshot" (available while recording)
+- [ ] Global keyboard shortcut to capture screenshot during recording
+- [ ] In-app capture button in the recording toolbar
+- [ ] Store screenshots as PNGs in the app data directory alongside audio files
+- [ ] Visual indicator / toast when a screenshot is captured (non-disruptive)
+- [ ] Transcript view: inline screenshot thumbnails at the correct timestamp position
+- [ ] Meeting detail view: screenshot gallery / timeline view
+- [ ] Include screenshots in summary generation — send images to Claude (multimodal) for richer summaries that reference visual content
+- [ ] Export: include screenshots in markdown export (as embedded images or file references)
+
+**Approach**: User-initiated capture only — no automatic or periodic screenshots. The user decides what's worth capturing (an important slide, a diagram, a code snippet on screen) by pressing a shortcut or clicking a button. Screenshots are timestamped and linked to the transcript timeline so they appear in context. When generating summaries, attached screenshots are sent alongside the transcript to Claude's multimodal API, enabling the LLM to reference visual content in its output.
+
 ## Data flow
 
 ```
 Mic audio ─┐
-            ├──▶ Mixer ──▶ WAV chunks ──▶ whisper.cpp ──▶ Transcript ──▶ Claude API ──▶ Summary
-System audio┘       │                         │                              │
-                    ▼                         ▼                              ▼
-               Audio files              SQLite (segments)            SQLite (summaries)
+            ├──▶ Mixer ──▶ WAV chunks ──▶ whisper.cpp ──▶ Transcript ─┐
+System audio┘       │                         │                        ├──▶ Claude API ──▶ Summary
+                    ▼                         ▼                        │         │
+               Audio files              SQLite (segments)              │         ▼
+                                                                       │   SQLite (summaries)
+               User trigger ──▶ Screenshot ──▶ PNG files ─────────────┘
+                                    │
+                                    ▼
+                              SQLite (screenshots)
 ```
 
 ## Key decisions
