@@ -27,7 +27,7 @@ export default function TranscriptView({
 
   if (segments.length === 0 && status.state === "idle") {
     return (
-      <div className="flex flex-1 items-center justify-center text-gray-500">
+      <div className="flex flex-1 items-center justify-center text-text-tertiary">
         <p className="text-sm">No transcript yet</p>
       </div>
     );
@@ -38,17 +38,17 @@ export default function TranscriptView({
       <div className="space-y-3">
         {segments.map((seg) => (
           <div key={seg.id} className="flex gap-3">
-            <span className="shrink-0 pt-0.5 font-mono text-xs text-gray-500">
+            <span className="shrink-0 pt-0.5 font-mono text-xs text-text-tertiary">
               {formatTime(seg.startTime)}
             </span>
-            <p className="text-sm leading-relaxed text-gray-200">{seg.text}</p>
+            <p className="text-sm leading-relaxed text-text-secondary">{seg.text}</p>
           </div>
         ))}
       </div>
 
       {status.state === "transcribing" && (
-        <div className="mt-4 flex items-center gap-2 text-xs text-gray-400">
-          <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
+        <div className="mt-4 flex items-center gap-2 text-xs text-text-secondary">
+          <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-text-secondary border-t-transparent" />
           Transcribing audio...
         </div>
       )}

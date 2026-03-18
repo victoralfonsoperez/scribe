@@ -33,7 +33,7 @@ export default function AudioLevelMeter({ level }: AudioLevelMeterProps) {
           <div
             key={i}
             className={`flex-1 rounded-sm transition-opacity duration-75 ${
-              isActive ? segmentColor(i) : "bg-gray-700"
+              isActive ? segmentColor(i) : "bg-bg-active"
             }`}
             style={{ height: `${heightPercent}%` }}
           />

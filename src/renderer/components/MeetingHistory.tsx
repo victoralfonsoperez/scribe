@@ -103,10 +103,10 @@ export default function MeetingHistory({ onSelect }: MeetingHistoryProps) {
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* Search bar */}
-      <div className="border-b border-gray-800 px-4 py-3">
+      <div className="border-b border-border-default px-4 py-3">
         <div className="relative">
           <svg
-            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500"
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
             fill="currentColor"
@@ -120,11 +120,11 @@ export default function MeetingHistory({ onSelect }: MeetingHistoryProps) {
           <input
             type="text"
             placeholder="Search transcripts..."
-            className="w-full rounded-lg border border-gray-700 bg-gray-800 py-2 pl-10 pr-4 text-sm text-white placeholder:text-gray-500 focus:border-blue-500 focus:outline-none"
+            className="w-full rounded-lg border border-border-default bg-bg-tertiary py-2 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-tertiary focus:border-blue-500 focus:outline-none"
             onChange={(e) => handleSearchChange(e.target.value)}
           />
           {searching && (
-            <span className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
+            <span className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin rounded-full border-2 border-text-secondary border-t-transparent" />
           )}
         </div>
       </div>
@@ -132,21 +132,21 @@ export default function MeetingHistory({ onSelect }: MeetingHistoryProps) {
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
         {loading ? (
-          <div className="flex items-center justify-center py-12 text-gray-500">
-            <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
+          <div className="flex items-center justify-center py-12 text-text-tertiary">
+            <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-text-secondary border-t-transparent" />
             Loading meetings...
           </div>
         ) : showSearchResults ? (
           <SearchResults results={results} onSelect={onSelect} />
         ) : meetings.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+          <div className="flex flex-col items-center justify-center py-12 text-text-tertiary">
             <p className="text-sm">No meetings yet</p>
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-text-tertiary">
               Start recording to create your first meeting
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-800/50">
+          <div className="divide-y divide-border-subtle">
             {meetings.map((meeting) => (
               <MeetingRow
                 key={meeting.id}
@@ -177,21 +177,21 @@ export default function MeetingHistory({ onSelect }: MeetingHistoryProps) {
       {/* Delete confirmation dialog */}
       {deletingId && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-overlay"
           onClick={(e) => { if (e.target === e.currentTarget) setDeletingId(null); }}
         >
-          <div className="mx-4 w-full max-w-sm rounded-xl bg-gray-900 p-6 shadow-2xl">
-            <h3 className="text-lg font-semibold text-white">
+          <div className="mx-4 w-full max-w-sm rounded-xl bg-bg-secondary p-6 shadow-2xl">
+            <h3 className="text-lg font-semibold text-text-primary">
               Delete Meeting?
             </h3>
-            <p className="mt-2 text-sm text-gray-400">
+            <p className="mt-2 text-sm text-text-secondary">
               This will permanently delete the meeting and its audio files. This
               action cannot be undone.
             </p>
             <div className="mt-4 flex justify-end gap-3">
               <button
                 onClick={() => setDeletingId(null)}
-                className="rounded-lg px-4 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-white"
+                className="rounded-lg px-4 py-2 text-sm text-text-secondary hover:bg-bg-hover hover:text-text-primary"
               >
                 Keep meeting
               </button>
@@ -238,7 +238,7 @@ function MeetingRow({
   onStartDelete,
 }: MeetingRowProps) {
   return (
-    <div className="group flex items-center gap-3 px-4 py-3 hover:bg-gray-900/50">
+    <div className="group flex items-center gap-3 px-4 py-3 hover:bg-bg-secondary/50">
       <button
         onClick={onSelect}
         className="flex min-w-0 flex-1 flex-col items-start text-left"
@@ -255,14 +255,14 @@ function MeetingRow({
             }}
             onBlur={onRenameSubmit}
             onClick={(e) => e.stopPropagation()}
-            className="w-full rounded-lg border border-gray-700 bg-gray-800 px-2 py-0.5 text-sm text-white focus:border-blue-500 focus:outline-none"
+            className="w-full rounded-lg border border-border-default bg-bg-tertiary px-2 py-0.5 text-sm text-text-primary focus:border-blue-500 focus:outline-none"
           />
         ) : (
-          <span className="truncate text-sm font-medium text-white">
+          <span className="truncate text-sm font-medium text-text-primary">
             {meeting.title}
           </span>
         )}
-        <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-500">
+        <div className="mt-0.5 flex items-center gap-2 text-xs text-text-tertiary">
           <span>{formatDate(meeting.startedAt)}</span>
           <span>{formatTime(meeting.startedAt)}</span>
           {meeting.durationSeconds && (
@@ -287,7 +287,7 @@ function MeetingRow({
               e.stopPropagation();
               onStartRename();
             }}
-            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-800 hover:text-white"
+            className="rounded-lg p-1.5 text-text-secondary hover:bg-bg-hover hover:text-text-primary"
             aria-label="Rename meeting"
             title="Rename"
           >
@@ -305,7 +305,7 @@ function MeetingRow({
               e.stopPropagation();
               onStartDelete();
             }}
-            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-800 hover:text-red-400"
+            className="rounded-lg p-1.5 text-text-secondary hover:bg-bg-hover hover:text-red-400"
             aria-label="Delete meeting"
             title="Delete"
           >
@@ -336,25 +336,25 @@ interface SearchResultsProps {
 function SearchResults({ results, onSelect }: SearchResultsProps) {
   if (results.length === 0) {
     return (
-      <div className="py-12 text-center text-sm text-gray-500">
+      <div className="py-12 text-center text-sm text-text-tertiary">
         No matching transcripts. Try a different search.
       </div>
     );
   }
 
   return (
-    <div className="divide-y divide-gray-800/50">
+    <div className="divide-y divide-border-subtle">
       {results.map((group) => (
         <button
           key={group.meetingId}
           onClick={() => onSelect(group.meetingId)}
-          className="w-full px-4 py-3 text-left hover:bg-gray-900/50"
+          className="w-full px-4 py-3 text-left hover:bg-bg-secondary/50"
         >
           <div className="flex items-center gap-2">
-            <span className="min-w-0 truncate text-sm font-medium text-white">
+            <span className="min-w-0 truncate text-sm font-medium text-text-primary">
               {group.meetingTitle}
             </span>
-            <span className="shrink-0 text-xs text-gray-500">
+            <span className="shrink-0 text-xs text-text-tertiary">
               {formatDate(group.startedAt)}
             </span>
           </div>
@@ -362,16 +362,16 @@ function SearchResults({ results, onSelect }: SearchResultsProps) {
             {group.matches.slice(0, 3).map((match) => (
               <div
                 key={match.segmentId}
-                className="flex gap-2 text-xs text-gray-400"
+                className="flex gap-2 text-xs text-text-secondary"
               >
-                <span className="shrink-0 font-mono text-gray-500">
+                <span className="shrink-0 font-mono text-text-tertiary">
                   {formatTimestamp(match.startTime)}
                 </span>
                 <span className="truncate">{match.text}</span>
               </div>
             ))}
             {group.matches.length > 3 && (
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-text-tertiary">
                 +{group.matches.length - 3} more
               </span>
             )}
