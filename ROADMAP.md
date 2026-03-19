@@ -102,7 +102,7 @@ Make it feel like a real app.
 - [x] Menu bar / tray icon with quick recording toggle
 - [ ] Global keyboard shortcut to start/stop *(deferred)*
 - [ ] Meeting auto-detection (optional — detect when Meet/Teams window is active) *(deferred)*
-- [ ] Drag-and-drop audio file import (transcribe existing recordings) *(deferred)*
+- [x] Drag-and-drop audio file import (transcribe existing recordings)
 - [ ] Auto-update via electron-updater *(deferred)*
 - [x] Light/dark/system theme support
 

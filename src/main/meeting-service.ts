@@ -8,6 +8,7 @@ import type {
   SearchResultRow,
 } from "./meeting-repository.js";
 import type { TranscriptSegment } from "../shared/types.js";
+import { splitWavIntoSegments, getWavDuration } from "./audio-import.js";
 
 export type ExportFormat = "markdown" | "text";
 
@@ -36,6 +37,10 @@ export class MeetingService {
 
   getActiveMeetingId(): string | null {
     return this.activeMeetingId;
+  }
+
+  setActiveMeetingId(id: string | null): void {
+    this.activeMeetingId = id;
   }
 
   startMeeting(sessionDir: string): string {
@@ -72,6 +77,29 @@ export class MeetingService {
   addSegment(segment: TranscriptSegment): void {
     if (!this.activeMeetingId) return;
     this.repo.addSegment(this.activeMeetingId, segment);
+  }
+
+  addSegmentToMeeting(meetingId: string, segment: TranscriptSegment): void {
+    this.repo.addSegment(meetingId, segment);
+  }
+
+  importAudioFile(filePath: string): {
+    meetingId: string;
+    sessionDir: string;
+    segmentCount: number;
+  } {
+    const { sessionDir, segmentCount } = splitWavIntoSegments(filePath);
+    const duration = getWavDuration(filePath);
+
+    const id = crypto.randomUUID();
+    const now = Date.now();
+    const fileName = path.basename(filePath, path.extname(filePath));
+    const title = `Imported: ${fileName}`;
+
+    this.repo.createMeeting(id, title, now, sessionDir);
+    this.repo.endMeeting(id, now, duration);
+
+    return { meetingId: id, sessionDir, segmentCount };
   }
 
   listMeetings(): MeetingRow[] {
