@@ -4,12 +4,13 @@ import type {
   ModelDownloadProgress,
 } from "../../shared/types.js";
 import SummarySettings from "./SummarySettings.js";
+import { useTheme, type ThemePreference } from "../hooks/useTheme.js";
 
 interface ModelSelectorProps {
   onClose: () => void;
 }
 
-type SettingsTab = "engine" | "summarization";
+type SettingsTab = "engine" | "summarization" | "appearance";
 
 export default function ModelSelector({ onClose }: ModelSelectorProps) {
   const [tab, setTab] = useState<SettingsTab>("engine");
@@ -25,6 +26,7 @@ export default function ModelSelector({ onClose }: ModelSelectorProps) {
   const [error, setError] = useState<string | null>(null);
   const [deletingModel, setDeletingModel] = useState<string | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const { preference, setTheme } = useTheme();
 
   // Close on Escape
   useEffect(() => {
@@ -122,20 +124,27 @@ export default function ModelSelector({ onClose }: ModelSelectorProps) {
   const tabs: { key: SettingsTab; label: string }[] = [
     { key: "engine", label: "Transcription" },
     { key: "summarization", label: "Summarization" },
+    { key: "appearance", label: "Appearance" },
+  ];
+
+  const themeOptions: { key: ThemePreference; label: string }[] = [
+    { key: "light", label: "Light" },
+    { key: "dark", label: "Dark" },
+    { key: "system", label: "System" },
   ];
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-overlay"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="w-full max-w-md rounded-xl bg-gray-900 shadow-2xl outline-none"
+        className="w-full max-w-md rounded-xl bg-bg-secondary shadow-2xl outline-none"
       >
         {/* Header with tabs */}
-        <div className="flex items-center justify-between border-b border-gray-800 px-4 pt-4 pb-0">
+        <div className="flex items-center justify-between border-b border-border-default px-4 pt-4 pb-0">
           <div className="flex">
             {tabs.map((t) => (
               <button
@@ -143,8 +152,8 @@ export default function ModelSelector({ onClose }: ModelSelectorProps) {
                 onClick={() => { setTab(t.key); setError(null); }}
                 className={`border-b-2 px-3 py-2 text-xs font-medium transition-colors ${
                   tab === t.key
-                    ? "border-blue-500 text-white"
-                    : "border-transparent text-gray-500 hover:text-gray-300"
+                    ? "border-blue-500 text-text-primary"
+                    : "border-transparent text-text-tertiary hover:text-text-secondary"
                 }`}
               >
                 {t.label}
@@ -154,7 +163,7 @@ export default function ModelSelector({ onClose }: ModelSelectorProps) {
           <button
             onClick={onClose}
             aria-label="Close settings"
-            className="mb-2 rounded-lg p-1.5 text-gray-400 hover:bg-gray-800 hover:text-white"
+            className="mb-2 rounded-lg p-1.5 text-text-secondary hover:bg-bg-hover hover:text-text-primary"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -174,8 +183,8 @@ export default function ModelSelector({ onClose }: ModelSelectorProps) {
               {/* Whisper status */}
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-medium text-white">Transcription Engine</h3>
-                  <p className="text-xs text-gray-500">
+                  <h3 className="text-sm font-medium text-text-primary">Transcription Engine</h3>
+                  <p className="text-xs text-text-tertiary">
                     {whisperInstalled === null
                       ? "Checking status..."
                       : whisperInstalled
@@ -201,7 +210,7 @@ export default function ModelSelector({ onClose }: ModelSelectorProps) {
 
               {/* Models */}
               <div>
-                <h3 className="mb-2 text-sm font-medium text-white">Transcription Model</h3>
+                <h3 className="mb-2 text-sm font-medium text-text-primary">Transcription Model</h3>
                 <div className="space-y-1.5">
                   {models.map((model) => {
                     const isDownloading =
@@ -215,7 +224,7 @@ export default function ModelSelector({ onClose }: ModelSelectorProps) {
                         className={`group flex items-center justify-between rounded-lg px-3 py-2 ${
                           isSelected
                             ? "bg-blue-500/10"
-                            : "hover:bg-gray-800/50"
+                            : "hover:bg-bg-hover/50"
                         }`}
                       >
                         <button
@@ -228,15 +237,15 @@ export default function ModelSelector({ onClose }: ModelSelectorProps) {
                               className={`h-3.5 w-3.5 rounded-full border-2 ${
                                 isSelected
                                   ? "border-blue-500 bg-blue-500"
-                                  : "border-gray-600"
+                                  : "border-text-tertiary"
                               }`}
                             />
                           )}
                           <div className="text-left">
-                            <span className="text-sm text-gray-200">
+                            <span className="text-sm text-text-secondary">
                               {model.name}
                             </span>
-                            <span className="ml-2 text-xs text-gray-500">
+                            <span className="ml-2 text-xs text-text-tertiary">
                               {model.size}
                             </span>
                           </div>
@@ -245,7 +254,7 @@ export default function ModelSelector({ onClose }: ModelSelectorProps) {
                         <div className="flex items-center gap-2">
                           {isDownloading ? (
                             <>
-                              <div className="h-1.5 w-20 overflow-hidden rounded-full bg-gray-700">
+                              <div className="h-1.5 w-20 overflow-hidden rounded-full bg-bg-active">
                                 <div
                                   className="h-full rounded-full bg-blue-500 transition-all"
                                   style={{
@@ -253,7 +262,7 @@ export default function ModelSelector({ onClose }: ModelSelectorProps) {
                                   }}
                                 />
                               </div>
-                              <span className="text-xs text-gray-400">
+                              <span className="text-xs text-text-secondary">
                                 {downloadProgress.percent}%
                               </span>
                               <button
@@ -274,7 +283,7 @@ export default function ModelSelector({ onClose }: ModelSelectorProps) {
                                 </button>
                                 <button
                                   onClick={() => setDeletingModel(null)}
-                                  className="text-xs text-gray-500 hover:text-gray-300"
+                                  className="text-xs text-text-tertiary hover:text-text-secondary"
                                 >
                                   Keep
                                 </button>
@@ -282,7 +291,7 @@ export default function ModelSelector({ onClose }: ModelSelectorProps) {
                             ) : (
                               <button
                                 onClick={() => setDeletingModel(model.name)}
-                                className="text-xs text-gray-400 opacity-0 hover:text-red-400 group-hover:opacity-100"
+                                className="text-xs text-text-secondary opacity-0 hover:text-red-400 group-hover:opacity-100"
                               >
                                 Delete
                               </button>
@@ -291,7 +300,7 @@ export default function ModelSelector({ onClose }: ModelSelectorProps) {
                             <button
                               onClick={() => handleDownload(model.name)}
                               disabled={downloadProgress !== null}
-                              className="rounded-lg bg-gray-700 px-2 py-1 text-xs text-gray-300 hover:bg-gray-600 disabled:opacity-50"
+                              className="rounded-lg bg-bg-active px-2 py-1 text-xs text-text-secondary hover:bg-bg-hover disabled:opacity-50"
                             >
                               Download
                             </button>
@@ -311,6 +320,32 @@ export default function ModelSelector({ onClose }: ModelSelectorProps) {
 
           {tab === "summarization" && (
             <SummarySettings onClose={onClose} />
+          )}
+
+          {tab === "appearance" && (
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-medium text-text-primary">Theme</h3>
+                <p className="mt-1 text-xs text-text-tertiary">
+                  Choose how Scribe looks. System follows your macOS appearance.
+                </p>
+              </div>
+              <div className="flex rounded-lg border border-border-default bg-bg-primary p-0.5">
+                {themeOptions.map((opt) => (
+                  <button
+                    key={opt.key}
+                    onClick={() => setTheme(opt.key)}
+                    className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                      preference === opt.key
+                        ? "bg-bg-active text-text-primary"
+                        : "text-text-secondary hover:text-text-primary"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       </div>

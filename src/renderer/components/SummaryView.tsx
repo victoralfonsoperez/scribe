@@ -25,14 +25,14 @@ function formatSummaryContent(content: string) {
       elements.push(
         <h3
           key={i}
-          className="mt-4 mb-2 text-sm font-semibold text-white first:mt-0"
+          className="mt-4 mb-2 text-sm font-semibold text-text-primary first:mt-0"
         >
           {line.slice(3)}
         </h3>,
       );
     } else if (line.startsWith("- ")) {
       elements.push(
-        <li key={i} className="ml-4 text-sm text-gray-300">
+        <li key={i} className="ml-4 text-sm text-text-secondary">
           {line.slice(2)}
         </li>,
       );
@@ -40,7 +40,7 @@ function formatSummaryContent(content: string) {
       elements.push(<div key={i} className="h-1" />);
     } else {
       elements.push(
-        <p key={i} className="text-sm text-gray-300">
+        <p key={i} className="text-sm text-text-secondary">
           {line}
         </p>,
       );
@@ -92,7 +92,7 @@ export default function SummaryView({
   if (!latestSummary && !isGenerating) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-text-tertiary">
           No summary yet. Generate one from the transcript.
         </p>
         {status.state === "error" && (
@@ -111,8 +111,8 @@ export default function SummaryView({
   // Generating state
   if (isGenerating) {
     return (
-      <div className="flex flex-1 items-center justify-center gap-2 text-gray-400">
-        <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
+      <div className="flex flex-1 items-center justify-center gap-2 text-text-secondary">
+        <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-text-secondary border-t-transparent" />
         <span className="text-sm">Generating summary...</span>
       </div>
     );
@@ -122,13 +122,13 @@ export default function SummaryView({
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* Toolbar */}
-      <div className="flex items-center gap-2 border-b border-gray-800 px-4 py-3">
+      <div className="flex items-center gap-2 border-b border-border-default px-4 py-3">
         <div className="relative" ref={menuRef}>
           <button
             onClick={() => setShowPromptMenu(!showPromptMenu)}
             aria-expanded={showPromptMenu}
             aria-haspopup="true"
-            className="flex items-center gap-1 rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:bg-gray-800 hover:text-white"
+            className="flex items-center gap-1 rounded-lg border border-border-default px-3 py-1.5 text-xs text-text-secondary hover:bg-bg-hover hover:text-text-primary"
           >
             Re-summarize
             <svg
@@ -146,7 +146,7 @@ export default function SummaryView({
           </button>
           {showPromptMenu && (
             <div
-              className="absolute top-full left-0 z-10 mt-1 rounded-lg border border-gray-700 bg-gray-900 py-1 shadow-lg"
+              className="absolute top-full left-0 z-10 mt-1 rounded-lg border border-border-default bg-bg-secondary py-1 shadow-lg"
               role="menu"
             >
               {PROMPT_OPTIONS.map((opt) => (
@@ -157,7 +157,7 @@ export default function SummaryView({
                     setShowPromptMenu(false);
                     onGenerate(opt.key);
                   }}
-                  className="block w-full px-4 py-1.5 text-left text-xs text-gray-300 hover:bg-gray-800"
+                  className="block w-full px-4 py-1.5 text-left text-xs text-text-secondary hover:bg-bg-hover"
                 >
                   {opt.label}
                 </button>
@@ -169,19 +169,19 @@ export default function SummaryView({
         {copied && <span className="text-xs text-green-400">Copied!</span>}
         <button
           onClick={handleCopy}
-          className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:bg-gray-800 hover:text-white"
+          className="rounded-lg border border-border-default px-3 py-1.5 text-xs text-text-secondary hover:bg-bg-hover hover:text-text-primary"
         >
           Copy
         </button>
 
         <button
           onClick={() => onDelete(latestSummary.id)}
-          className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-red-400 hover:bg-gray-800 hover:text-red-300"
+          className="rounded-lg border border-border-default px-3 py-1.5 text-xs text-red-400 hover:bg-bg-hover hover:text-red-300"
         >
           Delete
         </button>
 
-        <span className="ml-auto truncate text-xs text-gray-500">
+        <span className="ml-auto truncate text-xs text-text-tertiary">
           via {latestSummary.model}
         </span>
       </div>

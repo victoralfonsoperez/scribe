@@ -31,6 +31,7 @@ const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
+    backgroundColor: "#030712",
     icon: app.isPackaged
       ? path.join(process.resourcesPath, "icon.png")
       : path.join(__dirname, "../../build/icon.png"),

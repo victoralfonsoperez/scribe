@@ -104,7 +104,7 @@ Make it feel like a real app.
 - [ ] Meeting auto-detection (optional — detect when Meet/Teams window is active) *(deferred)*
 - [x] Drag-and-drop audio file import (transcribe existing recordings)
 - [ ] Auto-update via electron-updater *(deferred)*
-- [ ] Light/dark theme support *(deferred)*
+- [x] Light/dark/system theme support
 
 ### Phase 6 — Speaker Diarization (WhisperX)
 
@@ -122,14 +122,90 @@ Identify *who* said *what* using WhisperX + pyannote.audio as a post-recording s
 
 **Approach**: Hybrid — whisper.cpp handles real-time 30-second chunk transcription during recording. After recording stops, WhisperX processes the full audio for speaker diarization, then merges speaker labels into the existing segments. This gives pyannote full audio context for accurate speaker identification without replacing the live transcription pipeline.
 
+### Phase 7 — Screenshot Capture (Meeting Notebook)
+
+Capture screenshots on demand during a meeting to build a visual record alongside the transcript. Think of Scribe as a meeting notebook — audio gives you the words, screenshots give you the slides, diagrams, and shared screens.
+
+- [ ] Add `screenshots` table in SQLite (id, meetingId, timestamp, filePath, caption)
+- [ ] Screenshot capture via ScreenCaptureKit — capture current screen on demand
+- [ ] Tray icon menu item: "Capture Screenshot" (available while recording)
+- [ ] Global keyboard shortcut to capture screenshot during recording
+- [ ] In-app capture button in the recording toolbar
+- [ ] Store screenshots as PNGs in the app data directory alongside audio files
+- [ ] Visual indicator / toast when a screenshot is captured (non-disruptive)
+- [ ] Transcript view: inline screenshot thumbnails at the correct timestamp position
+- [ ] Meeting detail view: screenshot gallery / timeline view
+- [ ] Include screenshots in summary generation — send images to Claude (multimodal) for richer summaries that reference visual content
+- [ ] Export: include screenshots in markdown export (as embedded images or file references)
+
+**Approach**: User-initiated capture only — no automatic or periodic screenshots. The user decides what's worth capturing (an important slide, a diagram, a code snippet on screen) by pressing a shortcut or clicking a button. Screenshots are timestamped and linked to the transcript timeline so they appear in context. When generating summaries, attached screenshots are sent alongside the transcript to Claude's multimodal API, enabling the LLM to reference visual content in its output.
+
+### Phase 8 — Windows Platform Support
+
+Bring Scribe to Windows while keeping the macOS experience intact. The core architecture (IPC, TypeScript services, SQLite, React renderer) is already platform-agnostic — the work concentrates on replacing macOS-native components and adding platform conditionals.
+
+#### 8a. Native Audio Capture (WASAPI)
+
+The entire native addon is Objective-C++ using ScreenCaptureKit/CoreAudio. Windows needs a parallel implementation.
+
+- [ ] Restructure `src/native/` into `darwin/`, `win32/`, `common/` directories
+- [ ] Extract `wav_writer.mm` → `common/wav_writer.cpp` (already pure C++, just rename)
+- [ ] Write `src/native/win32/audio_capture.cpp` using WASAPI
+  - System audio loopback via `IAudioClient` with `AUDCLNT_STREAMFLAGS_LOOPBACK`
+  - Microphone capture via WASAPI capture endpoint
+  - Same N-API interface so `audio-bridge.ts` requires no changes
+- [ ] Permissions: return `{ mic: true, screen: true }` on Windows (no macOS-style prompts)
+- [ ] Update `binding.gyp` with OS conditions to select sources and link libraries per platform
+
+#### 8b. Whisper.cpp Windows Build
+
+- [ ] Platform-conditional cmake flags (remove `-DWHISPER_METAL=ON`, use CPU-only on Windows)
+- [ ] Binary name: `whisper-cli.exe` on Windows
+- [ ] Skip `fixDylibs` step (macOS-only `otool`/`install_name_tool`)
+- [ ] Handle Windows cmake output paths (`Release/` subdirectory)
+- [ ] Windows-specific prerequisite messages (Visual Studio Build Tools instead of Xcode)
+
+#### 8c. UI Platform Adaptation
+
+- [ ] Platform-conditional `titleBarStyle`: `hiddenInset` on macOS, standard frame on Windows
+- [ ] Expose `process.platform` to renderer via preload script
+- [ ] Conditional header padding (`pl-20` only on macOS for traffic light buttons)
+
+#### 8d. Packaging & Distribution
+
+- [ ] Add `win` target in electron-builder config (NSIS installer, x64 + arm64)
+- [ ] Add `package:win` script
+- [ ] Convert app icon to `.ico` format for Windows
+- [ ] Document Windows build prerequisites (Visual Studio Build Tools, cmake, git)
+
+#### 8e. Tray Icon & Platform Behavior
+
+- [ ] Guard `setTemplateImage(true)` (macOS-only API)
+- [ ] Adjust tray icon size (16x16 for Windows vs 22x22 for macOS)
+- [ ] Verify tray click behavior on Windows (left-click vs right-click context menu)
+
+#### 8f. Process & Signal Handling
+
+- [ ] Verify `SIGTERM` process kill works correctly on Windows (Node translates to `TerminateProcess`)
+- [ ] Confirm `killed` property check in transcription service handles Windows behavior
+
+**Risk assessment**: The WASAPI audio addon is the highest-risk item — COM threading requirements and loopback capture setup need careful handling. Whisper.cpp build is medium risk (users need VS Build Tools). Everything else is low risk (straightforward platform conditionals).
+
+**Approach**: Keep a single codebase with platform conditionals rather than forking. The N-API interface contract stays identical across platforms so all TypeScript code above the native layer works unchanged. Test on Windows end-to-end: install whisper, download model, record, transcribe, summarize.
+
 ## Data flow
 
 ```
 Mic audio ─┐
-            ├──▶ Mixer ──▶ WAV chunks ──▶ whisper.cpp ──▶ Transcript ──▶ Claude API ──▶ Summary
-System audio┘       │                         │                              │
-                    ▼                         ▼                              ▼
-               Audio files              SQLite (segments)            SQLite (summaries)
+            ├──▶ Mixer ──▶ WAV chunks ──▶ whisper.cpp ──▶ Transcript ─┐
+System audio┘       │                         │                        ├──▶ Claude API ──▶ Summary
+                    ▼                         ▼                        │         │
+               Audio files              SQLite (segments)              │         ▼
+                                                                       │   SQLite (summaries)
+               User trigger ──▶ Screenshot ──▶ PNG files ─────────────┘
+                                    │
+                                    ▼
+                              SQLite (screenshots)
 ```
 
 ## Key decisions

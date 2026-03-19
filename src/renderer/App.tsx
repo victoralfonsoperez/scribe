@@ -157,19 +157,19 @@ function App() {
   }, [state]);
 
   return (
-    <div className="flex h-screen flex-col bg-gray-950 text-white">
+    <div className="flex h-screen flex-col bg-bg-primary text-text-primary">
       {/* Header — pl-20 avoids macOS traffic light buttons */}
-      <div className="flex items-center justify-between border-b border-gray-800 py-3 pl-20 pr-4">
+      <div className="flex items-center justify-between border-b border-border-default py-3 pl-20 pr-4">
         <h1 className="text-lg font-bold">Scribe</h1>
         <div className="flex items-center gap-2">
           {/* Tab navigation */}
-          <div className="flex rounded-lg border border-gray-800 bg-gray-900 p-0.5">
+          <div className="flex rounded-lg border border-border-default bg-bg-secondary p-0.5">
             <button
               onClick={() => setView("recording")}
               className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
                 view === "recording"
-                  ? "bg-gray-700 text-white"
-                  : "text-gray-400 hover:text-white"
+                  ? "bg-bg-active text-text-primary"
+                  : "text-text-secondary hover:text-text-primary"
               }`}
             >
               Recording
@@ -179,8 +179,8 @@ function App() {
               disabled={isRecording}
               className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
                 view === "history" || view === "meeting"
-                  ? "bg-gray-700 text-white"
-                  : "text-gray-400 hover:text-white"
+                  ? "bg-bg-active text-text-primary"
+                  : "text-text-secondary hover:text-text-primary"
               } disabled:cursor-not-allowed disabled:opacity-50`}
             >
               History
@@ -189,7 +189,7 @@ function App() {
           <button
             onClick={() => setShowSettings(true)}
             aria-label="Settings"
-            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-800 hover:text-white"
+            className="rounded-lg p-1.5 text-text-secondary hover:bg-bg-hover hover:text-text-primary"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -255,23 +255,23 @@ function App() {
                       onClick={handleClick}
                       size="large"
                     />
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-text-tertiary">
                       {state === "error"
                         ? "Something went wrong. Try again."
                         : "Press to start recording"}
                     </p>
-                    <div className="flex items-center gap-2 text-gray-500">
-                      <div className="h-px w-8 bg-gray-800" />
+                    <div className="flex items-center gap-2 text-text-tertiary">
+                      <div className="h-px w-8 bg-border-default" />
                       <span className="text-xs">or</span>
-                      <div className="h-px w-8 bg-gray-800" />
+                      <div className="h-px w-8 bg-border-default" />
                     </div>
                     <button
                       onClick={() => handleImportAudio()}
-                      className="rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-white"
+                      className="rounded-lg border border-border-default px-4 py-2 text-sm text-text-secondary hover:bg-bg-hover hover:text-text-primary"
                     >
                       Import audio file
                     </button>
-                    <p className="text-xs text-gray-600">
+                    <p className="text-xs text-text-tertiary">
                       or drag &amp; drop a WAV file here
                     </p>
                   </>
@@ -282,8 +282,8 @@ function App() {
           {/* Importing state */}
           {importing && (
             <div className="flex flex-1 flex-col items-center justify-center gap-3">
-              <span className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
-              <p className="text-sm text-gray-400">
+              <span className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-text-secondary border-t-transparent" />
+              <p className="text-sm text-text-secondary">
                 Importing and transcribing...
               </p>
             </div>
@@ -294,20 +294,20 @@ function App() {
             state === "stopping" ||
             segments.length > 0) && (
             <>
-              <div className="flex items-center gap-4 border-b border-gray-800 px-4 py-3">
+              <div className="flex items-center gap-4 border-b border-border-default px-4 py-3">
                 <RecordButton state={state} onClick={handleClick} />
 
                 <div className="min-w-0 flex-1">
                   <AudioLevelMeter level={level} />
                   <div className="mt-1 flex items-center gap-2">
-                    <p className="text-xs font-medium text-gray-400">
+                    <p className="text-xs font-medium text-text-secondary">
                       {state === "idle" && "Recording complete"}
                       {state === "recording" && "Recording..."}
                       {state === "stopping" && "Stopping..."}
                       {state === "error" && "Recording failed"}
                     </p>
                     {state === "recording" && segmentCount > 0 && (
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-text-tertiary">
                         · {segmentCount} chunk
                         {segmentCount !== 1 ? "s" : ""} captured
                       </span>
