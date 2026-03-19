@@ -162,6 +162,11 @@ export interface ScribeAPI {
     format: ExportFormat,
   ) => Promise<string | null>;
 
+  // Import
+  importAudio: (
+    filePath?: string,
+  ) => Promise<{ ok: boolean; meetingId?: string; error?: string }>;
+
   // Summaries
   generateSummary: (
     meetingId: string,

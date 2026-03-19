@@ -1,6 +1,8 @@
-import { ipcMain } from "electron";
+import { ipcMain, dialog } from "electron";
+import path from "node:path";
 import type { MeetingService } from "./meeting-service.js";
 import type { MeetingRepository } from "./meeting-repository.js";
+import type { TranscriptionService } from "./transcription-service.js";
 import type {
   MeetingListItem,
   MeetingDetail,
@@ -10,6 +12,7 @@ import type {
 export function registerMeetingIPC(
   meetingService: MeetingService,
   meetingRepo: MeetingRepository,
+  transcriptionService?: TranscriptionService,
 ): void {
   ipcMain.handle("meeting:list", (): MeetingListItem[] => {
     const meetings = meetingService.listMeetings();
@@ -85,4 +88,52 @@ export function registerMeetingIPC(
       return meetingService.exportTranscript(id, format);
     },
   );
+
+  ipcMain.handle("meeting:import-audio", async (_event, filePath?: string) => {
+    try {
+      let targetPath = filePath;
+
+      if (!targetPath) {
+        const result = await dialog.showOpenDialog({
+          title: "Import Audio File",
+          filters: [{ name: "Audio Files", extensions: ["wav"] }],
+          properties: ["openFile"],
+        });
+        if (result.canceled || result.filePaths.length === 0) {
+          return { ok: false, error: "Cancelled" };
+        }
+        targetPath = result.filePaths[0];
+      }
+
+      const ext = path.extname(targetPath).toLowerCase();
+      if (ext !== ".wav") {
+        return { ok: false, error: "Only WAV files are supported" };
+      }
+
+      const { meetingId, sessionDir, segmentCount } =
+        meetingService.importAudioFile(targetPath);
+
+      // Enqueue all segments for transcription.
+      // The existing segment callback in transcription-bridge already handles
+      // sending segments to the renderer and calling the onSegment callback,
+      // which is wired to meetingService.addSegment in index.ts.
+      // We set the active meeting so addSegment works.
+      if (transcriptionService) {
+        meetingService.setActiveMeetingId(meetingId);
+        transcriptionService.clearSegments();
+        for (let i = 0; i < segmentCount; i++) {
+          const segPath = path.join(
+            sessionDir,
+            `segment_${String(i).padStart(4, "0")}.wav`,
+          );
+          transcriptionService.enqueue(segPath, i);
+        }
+      }
+
+      return { ok: true, meetingId };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      return { ok: false, error: message };
+    }
+  });
 }

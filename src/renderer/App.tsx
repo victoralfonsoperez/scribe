@@ -21,6 +21,8 @@ function App() {
   const [selectedMeetingId, setSelectedMeetingId] = useState<string | null>(
     null,
   );
+  const [importing, setImporting] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
   const cleanupRefs = useRef<(() => void)[]>([]);
   const handleClickRef = useRef<() => void>(() => {});
   const {
@@ -92,6 +94,61 @@ function App() {
     setView("history");
   }, []);
 
+  const handleImportAudio = useCallback(
+    async (filePath?: string) => {
+      setError(null);
+      setImporting(true);
+      clearSegments();
+      const result = await window.scribe.importAudio(filePath);
+      setImporting(false);
+
+      if (!result.ok) {
+        if (result.error !== "Cancelled") {
+          setError(result.error ?? "Import failed");
+        }
+        return;
+      }
+
+      if (result.meetingId) {
+        setSelectedMeetingId(result.meetingId);
+        setView("meeting");
+      }
+    },
+    [clearSegments],
+  );
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setDragOver(false);
+
+      const file = e.dataTransfer.files[0];
+      if (!file) return;
+
+      // Electron provides the full path via the path property
+      const filePath = (file as File & { path?: string }).path;
+      if (!filePath) return;
+
+      if (!filePath.toLowerCase().endsWith(".wav")) {
+        setError("Only WAV files are supported");
+        return;
+      }
+
+      handleImportAudio(filePath);
+    },
+    [handleImportAudio],
+  );
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+  }, []);
+
   const isRecording = state === "recording" || state === "stopping";
 
   // Sync recording state to tray icon
@@ -161,20 +218,76 @@ function App() {
 
           {/* Idle state — prominent centered CTA */}
           {(state === "idle" || state === "error") &&
-            segments.length === 0 && (
-              <div className="flex flex-1 flex-col items-center justify-center gap-5">
-                <RecordButton
-                  state={state}
-                  onClick={handleClick}
-                  size="large"
-                />
-                <p className="text-sm text-gray-500">
-                  {state === "error"
-                    ? "Something went wrong. Try again."
-                    : "Press to start recording"}
-                </p>
+            segments.length === 0 &&
+            !importing && (
+              <div
+                className={`flex flex-1 flex-col items-center justify-center gap-5 ${
+                  dragOver
+                    ? "rounded-xl border-2 border-dashed border-blue-500 bg-blue-500/5 m-4"
+                    : ""
+                }`}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+              >
+                {dragOver ? (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="h-12 w-12 text-blue-500"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10.5 3.75a6 6 0 00-5.98 6.496A5.25 5.25 0 006.75 20.25H18a4.5 4.5 0 002.206-8.423 3.75 3.75 0 00-4.133-4.303A6.001 6.001 0 0010.5 3.75zm2.03 5.47a.75.75 0 00-1.06 0l-3 3a.75.75 0 101.06 1.06l1.72-1.72v4.19a.75.75 0 001.5 0v-4.19l1.72 1.72a.75.75 0 101.06-1.06l-3-3z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <p className="text-sm text-blue-400">
+                      Drop WAV file to import
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <RecordButton
+                      state={state}
+                      onClick={handleClick}
+                      size="large"
+                    />
+                    <p className="text-sm text-gray-500">
+                      {state === "error"
+                        ? "Something went wrong. Try again."
+                        : "Press to start recording"}
+                    </p>
+                    <div className="flex items-center gap-2 text-gray-500">
+                      <div className="h-px w-8 bg-gray-800" />
+                      <span className="text-xs">or</span>
+                      <div className="h-px w-8 bg-gray-800" />
+                    </div>
+                    <button
+                      onClick={() => handleImportAudio()}
+                      className="rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-white"
+                    >
+                      Import audio file
+                    </button>
+                    <p className="text-xs text-gray-600">
+                      or drag &amp; drop a WAV file here
+                    </p>
+                  </>
+                )}
               </div>
             )}
+
+          {/* Importing state */}
+          {importing && (
+            <div className="flex flex-1 flex-col items-center justify-center gap-3">
+              <span className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
+              <p className="text-sm text-gray-400">
+                Importing and transcribing...
+              </p>
+            </div>
+          )}
 
           {/* Active / has-transcript state — compact toolbar */}
           {(state === "recording" ||

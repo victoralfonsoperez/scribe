@@ -89,7 +89,7 @@ registerAudioIPC(() => mainWindow, {
 });
 
 // Register meeting IPC handlers
-registerMeetingIPC(meetingService, meetingRepo);
+registerMeetingIPC(meetingService, meetingRepo, transcriptionService);
 
 // Set up summary services
 const llmClient = new LLMClient();
