@@ -49,7 +49,7 @@
     "appId": "com.scribe.app",
     "productName": "Scribe",
     "mac": {
-      "icon": "build/icon.icns",
+      "icon": "resources/icon.icns",
       "category": "public.app-category.productivity",
       "target": [
         {
@@ -60,8 +60,8 @@
           ]
         }
       ],
-      "entitlements": "build/entitlements.mac.plist",
-      "entitlementsInherit": "build/entitlements.mac.plist",
+      "entitlements": "resources/entitlements.mac.plist",
+      "entitlementsInherit": "resources/entitlements.mac.plist",
       "hardenedRuntime": true
     },
     "npmRebuild": true,
