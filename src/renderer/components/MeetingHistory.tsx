@@ -239,11 +239,8 @@ function MeetingRow({
 }: MeetingRowProps) {
   return (
     <div className="group flex items-center gap-3 px-4 py-3 hover:bg-bg-secondary/50">
-      <button
-        onClick={onSelect}
-        className="flex min-w-0 flex-1 flex-col items-start text-left"
-      >
-        {isRenaming ? (
+      {isRenaming ? (
+        <div className="flex min-w-0 flex-1 flex-col items-start text-left">
           <input
             ref={renameInputRef}
             type="text"
@@ -254,30 +251,49 @@ function MeetingRow({
               if (e.key === "Escape") onRenameCancel();
             }}
             onBlur={onRenameSubmit}
-            onClick={(e) => e.stopPropagation()}
             className="w-full rounded-lg border border-border-default bg-bg-tertiary px-2 py-0.5 text-sm text-text-primary focus:border-blue-500 focus:outline-none"
           />
-        ) : (
+          <div className="mt-0.5 flex items-center gap-2 text-xs text-text-tertiary">
+            <span>{formatDate(meeting.startedAt)}</span>
+            <span>{formatTime(meeting.startedAt)}</span>
+            {meeting.durationSeconds && (
+              <>
+                <span>·</span>
+                <span>{formatDuration(meeting.durationSeconds)}</span>
+              </>
+            )}
+            <span>·</span>
+            <span>
+              {meeting.segmentCount} part
+              {meeting.segmentCount !== 1 ? "s" : ""}
+            </span>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={onSelect}
+          className="flex min-w-0 flex-1 flex-col items-start text-left"
+        >
           <span className="truncate text-sm font-medium text-text-primary">
             {meeting.title}
           </span>
-        )}
-        <div className="mt-0.5 flex items-center gap-2 text-xs text-text-tertiary">
-          <span>{formatDate(meeting.startedAt)}</span>
-          <span>{formatTime(meeting.startedAt)}</span>
-          {meeting.durationSeconds && (
-            <>
-              <span>·</span>
-              <span>{formatDuration(meeting.durationSeconds)}</span>
-            </>
-          )}
-          <span>·</span>
-          <span>
-            {meeting.segmentCount} part
-            {meeting.segmentCount !== 1 ? "s" : ""}
-          </span>
-        </div>
-      </button>
+          <div className="mt-0.5 flex items-center gap-2 text-xs text-text-tertiary">
+            <span>{formatDate(meeting.startedAt)}</span>
+            <span>{formatTime(meeting.startedAt)}</span>
+            {meeting.durationSeconds && (
+              <>
+                <span>·</span>
+                <span>{formatDuration(meeting.durationSeconds)}</span>
+              </>
+            )}
+            <span>·</span>
+            <span>
+              {meeting.segmentCount} part
+              {meeting.segmentCount !== 1 ? "s" : ""}
+            </span>
+          </div>
+        </button>
+      )}
 
       {/* Actions (visible on hover) */}
       {!isRenaming && (
