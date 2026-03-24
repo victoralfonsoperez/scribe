@@ -39,6 +39,8 @@ const api: ScribeAPI = {
     ipcRenderer.invoke("meeting:import-audio", filePath),
   importTranscript: (filePath?: string) =>
     ipcRenderer.invoke("meeting:import-transcript", filePath),
+  importTranscriptText: (text: string) =>
+    ipcRenderer.invoke("meeting:import-transcript-text", text),
 
   // Model management
   listModels: () => ipcRenderer.invoke("model:list"),
