@@ -12,6 +12,7 @@ const PROMPT_OPTIONS = [
   { key: "default", label: "Standard" },
   { key: "brief", label: "Brief (TL;DR)" },
   { key: "detailed", label: "Detailed" },
+  { key: "decisions", label: "Decisions & Owners" },
 ];
 
 function formatSummaryContent(content: string) {
