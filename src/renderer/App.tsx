@@ -140,6 +140,32 @@ function App() {
     [],
   );
 
+  const handlePasteTranscript = useCallback(async () => {
+    setError(null);
+    let text: string;
+    try {
+      text = await navigator.clipboard.readText();
+    } catch {
+      setError("Could not read clipboard. Make sure the app has clipboard access.");
+      return;
+    }
+    if (!text.trim()) {
+      setError("Clipboard is empty");
+      return;
+    }
+    setImportingTranscript(true);
+    const result = await window.scribe.importTranscriptText(text);
+    setImportingTranscript(false);
+    if (!result.ok) {
+      setError(result.error ?? "Import failed");
+      return;
+    }
+    if (result.meetingId) {
+      setSelectedMeetingId(result.meetingId);
+      setView("meeting");
+    }
+  }, []);
+
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
@@ -302,6 +328,12 @@ function App() {
                       className="rounded-lg border border-border-default px-4 py-2 text-sm text-text-secondary hover:bg-bg-hover hover:text-text-primary"
                     >
                       Import transcript (.vtt)
+                    </button>
+                    <button
+                      onClick={handlePasteTranscript}
+                      className="rounded-lg border border-border-default px-4 py-2 text-sm text-text-secondary hover:bg-bg-hover hover:text-text-primary"
+                    >
+                      Paste transcript
                     </button>
                     <p className="text-xs text-text-tertiary">
                       or drag &amp; drop a WAV or VTT file here

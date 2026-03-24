@@ -169,6 +169,9 @@ export interface ScribeAPI {
   importTranscript: (
     filePath?: string,
   ) => Promise<{ ok: boolean; meetingId?: string; error?: string }>;
+  importTranscriptText: (
+    text: string,
+  ) => Promise<{ ok: boolean; meetingId?: string; error?: string }>;
 
   // Summaries
   generateSummary: (

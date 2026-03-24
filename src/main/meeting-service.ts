@@ -9,7 +9,7 @@ import type {
 } from "./meeting-repository.js";
 import type { TranscriptSegment } from "../shared/types.js";
 import { splitWavIntoSegments, getWavDuration } from "./audio-import.js";
-import { parseVTT } from "./transcript-import.js";
+import { parseVTT, parseVTTContent, parsePlainText } from "./transcript-import.js";
 
 export type ExportFormat = "markdown" | "text";
 
@@ -101,6 +101,34 @@ export class MeetingService {
     this.repo.endMeeting(id, now, duration);
 
     return { meetingId: id, sessionDir, segmentCount };
+  }
+
+  importTranscriptText(text: string): { meetingId: string; segmentCount: number } {
+    const isVTT = text.trimStart().startsWith("WEBVTT");
+    const segments = isVTT ? parseVTTContent(text) : parsePlainText(text);
+    if (segments.length === 0) {
+      throw new Error("No transcript content found in the pasted text");
+    }
+
+    const id = crypto.randomUUID();
+    const now = Date.now();
+    const title = `Pasted transcript ${new Date(now).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    })}`;
+    const duration = segments[segments.length - 1].endTime;
+
+    this.repo.createMeeting(id, title, now, "");
+    this.repo.endMeeting(id, now, duration);
+
+    for (const seg of segments) {
+      this.repo.addSegment(id, seg);
+    }
+
+    return { meetingId: id, segmentCount: segments.length };
   }
 
   importTranscriptFile(filePath: string): { meetingId: string; segmentCount: number } {

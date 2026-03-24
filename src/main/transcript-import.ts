@@ -16,8 +16,7 @@ function stripVttTags(text: string): string {
   return text.replace(/<[^>]+>/g, "").trim();
 }
 
-export function parseVTT(filePath: string): TranscriptSegment[] {
-  const content = fs.readFileSync(filePath, "utf-8");
+export function parseVTTContent(content: string): TranscriptSegment[] {
   const lines = content.replace(/\r\n/g, "\n").split("\n");
 
   const segments: TranscriptSegment[] = [];
@@ -81,4 +80,27 @@ export function parseVTT(filePath: string): TranscriptSegment[] {
   }
 
   return segments;
+}
+
+export function parsePlainText(content: string): TranscriptSegment[] {
+  const now = Date.now();
+  const paragraphs = content
+    .replace(/\r\n/g, "\n")
+    .split(/\n{2,}/)
+    .map((p) => p.replace(/\n/g, " ").trim())
+    .filter((p) => p.length > 0);
+
+  return paragraphs.map((text, i) => ({
+    id: `seg-${i}-${now}-${Math.random().toString(36).slice(2, 7)}`,
+    segmentIndex: i,
+    startTime: 0,
+    endTime: 0,
+    text,
+    timestamp: now,
+  }));
+}
+
+export function parseVTT(filePath: string): TranscriptSegment[] {
+  const content = fs.readFileSync(filePath, "utf-8");
+  return parseVTTContent(content);
 }

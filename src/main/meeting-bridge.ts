@@ -89,6 +89,16 @@ export function registerMeetingIPC(
     },
   );
 
+  ipcMain.handle("meeting:import-transcript-text", (_event, text: string) => {
+    try {
+      const { meetingId } = meetingService.importTranscriptText(text);
+      return { ok: true, meetingId };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      return { ok: false, error: message };
+    }
+  });
+
   ipcMain.handle("meeting:import-transcript", async (_event, filePath?: string) => {
     try {
       let targetPath = filePath;
