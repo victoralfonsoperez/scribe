@@ -9,6 +9,7 @@ import type {
 } from "./meeting-repository.js";
 import type { TranscriptSegment } from "../shared/types.js";
 import { splitWavIntoSegments, getWavDuration } from "./audio-import.js";
+import { parseVTT } from "./transcript-import.js";
 
 export type ExportFormat = "markdown" | "text";
 
@@ -100,6 +101,28 @@ export class MeetingService {
     this.repo.endMeeting(id, now, duration);
 
     return { meetingId: id, sessionDir, segmentCount };
+  }
+
+  importTranscriptFile(filePath: string): { meetingId: string; segmentCount: number } {
+    const segments = parseVTT(filePath);
+    if (segments.length === 0) {
+      throw new Error("No transcript content found in the VTT file");
+    }
+
+    const id = crypto.randomUUID();
+    const now = Date.now();
+    const fileName = path.basename(filePath, path.extname(filePath));
+    const title = `Imported: ${fileName}`;
+    const duration = segments[segments.length - 1].endTime;
+
+    this.repo.createMeeting(id, title, now, "");
+    this.repo.endMeeting(id, now, duration);
+
+    for (const seg of segments) {
+      this.repo.addSegment(id, seg);
+    }
+
+    return { meetingId: id, segmentCount: segments.length };
   }
 
   listMeetings(): MeetingRow[] {

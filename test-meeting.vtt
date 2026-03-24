@@ -1,0 +1,73 @@
+WEBVTT
+
+00:00:02.000 --> 00:00:08.500
+<v Victor Perez>Good morning everyone, let's get started. Today we're reviewing the Q2 roadmap and deciding on priorities.
+
+00:00:09.000 --> 00:00:15.000
+<v Sarah Chen>Thanks Victor. I've prepared the product backlog. We have three main initiatives: the new onboarding flow, the analytics dashboard, and the API v2 migration.
+
+00:00:15.500 --> 00:00:22.000
+<v Marco Rossi>Before we dive in, I want to flag that the engineering team is at capacity until end of April. We need to be realistic about what we can ship.
+
+00:00:22.500 --> 00:00:30.000
+<v Victor Perez>Good point Marco. Let's rank these. Sarah, what's the business impact if we delay the onboarding flow?
+
+00:00:30.500 --> 00:00:40.000
+<v Sarah Chen>Significant. Our conversion rate has dropped 12% this quarter. The onboarding flow is directly tied to activation. I'd say it's our highest priority.
+
+00:00:40.500 --> 00:00:48.000
+<v Marco Rossi>Agreed. We can staff two engineers on it starting May 1st. I estimate four weeks to complete if we scope it correctly.
+
+00:00:48.500 --> 00:00:55.000
+<v Victor Perez>Okay, let's make a decision on that. The onboarding flow is our Q2 priority number one. Marco, you'll assign the team by end of this week.
+
+00:00:55.500 --> 00:01:02.000
+<v Marco Rossi>Confirmed. I'll send the team assignments by Friday.
+
+00:01:02.500 --> 00:01:10.000
+<v Sarah Chen>What about the analytics dashboard? We've had three enterprise clients ask for it specifically. It's blocking two deals worth about 200k ARR.
+
+00:01:10.500 --> 00:01:18.000
+<v Victor Perez>That changes things. Let's loop in David from sales. But for now, let's tentatively put analytics at number two.
+
+00:01:18.500 --> 00:01:26.000
+<v Marco Rossi>I can have one engineer start on the analytics backend in parallel. It won't slow down onboarding. Sarah, can you write the spec by next Wednesday?
+
+00:01:26.500 --> 00:01:30.000
+<v Sarah Chen>Yes, I'll have the spec ready by Wednesday April 3rd.
+
+00:01:30.500 --> 00:01:38.000
+<v Victor Perez>Perfect. And the API v2 migration — Marco, what's the risk if we push that to Q3?
+
+00:01:38.500 --> 00:01:48.000
+<v Marco Rossi>Medium risk. We have two integrations that depend on v1 endpoints that will break eventually, but nothing is on fire right now. Q3 is acceptable.
+
+00:01:48.500 --> 00:01:52.000
+<v Victor Perez>Agreed. API v2 is officially pushed to Q3.
+
+00:01:52.500 --> 00:02:00.000
+<v Sarah Chen>One more item — we need to renew the Datadog contract before April 15th or we lose the discounted rate. That's a 40k difference annually.
+
+00:02:00.500 --> 00:02:07.000
+<v Victor Perez>I'll handle the Datadog renewal personally. I'll contact our account manager today.
+
+00:02:07.500 --> 00:02:15.000
+<v Marco Rossi>Also, we still haven't resolved the on-call rotation. Two engineers are complaining about the current schedule. Can we revisit that?
+
+00:02:15.500 --> 00:02:22.000
+<v Victor Perez>Let's take that offline. Marco, schedule a 30-minute call with the team this week to sort it out.
+
+00:02:22.500 --> 00:02:28.000
+<v Marco Rossi>Will do. I'll send a calendar invite today.
+
+00:02:28.500 --> 00:02:35.000
+<v Sarah Chen>That covers everything on my list. Should we set a follow-up for two weeks from now?
+
+00:02:35.500 --> 00:02:42.000
+<v Victor Perez>Yes. Sarah, can you book the next sync for April 7th?
+
+00:02:42.500 --> 00:02:45.000
+<v Sarah Chen>Done, I'll send the invite after this call.
+
+00:02:45.500 --> 00:02:50.000
+<v Victor Perez>Great. Thanks everyone, talk soon.

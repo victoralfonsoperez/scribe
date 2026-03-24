@@ -22,6 +22,7 @@ function App() {
     null,
   );
   const [importing, setImporting] = useState(false);
+  const [importingTranscript, setImportingTranscript] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const cleanupRefs = useRef<(() => void)[]>([]);
   const handleClickRef = useRef<() => void>(() => {});
@@ -117,6 +118,28 @@ function App() {
     [clearSegments],
   );
 
+  const handleImportTranscript = useCallback(
+    async (filePath?: string) => {
+      setError(null);
+      setImportingTranscript(true);
+      const result = await window.scribe.importTranscript(filePath);
+      setImportingTranscript(false);
+
+      if (!result.ok) {
+        if (result.error !== "Cancelled") {
+          setError(result.error ?? "Import failed");
+        }
+        return;
+      }
+
+      if (result.meetingId) {
+        setSelectedMeetingId(result.meetingId);
+        setView("meeting");
+      }
+    },
+    [],
+  );
+
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
@@ -129,14 +152,16 @@ function App() {
       const filePath = (file as File & { path?: string }).path;
       if (!filePath) return;
 
-      if (!filePath.toLowerCase().endsWith(".wav")) {
-        setError("Only WAV files are supported");
-        return;
+      const lower = filePath.toLowerCase();
+      if (lower.endsWith(".vtt")) {
+        handleImportTranscript(filePath);
+      } else if (lower.endsWith(".wav")) {
+        handleImportAudio(filePath);
+      } else {
+        setError("Only WAV audio or VTT transcript files are supported");
       }
-
-      handleImportAudio(filePath);
     },
-    [handleImportAudio],
+    [handleImportAudio, handleImportTranscript],
   );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -219,7 +244,8 @@ function App() {
           {/* Idle state — prominent centered CTA */}
           {(state === "idle" || state === "error") &&
             segments.length === 0 &&
-            !importing && (
+            !importing &&
+            !importingTranscript && (
               <div
                 className={`flex flex-1 flex-col items-center justify-center gap-5 ${
                   dragOver
@@ -245,7 +271,7 @@ function App() {
                       />
                     </svg>
                     <p className="text-sm text-blue-400">
-                      Drop WAV file to import
+                      Drop WAV or VTT file to import
                     </p>
                   </>
                 ) : (
@@ -271,8 +297,14 @@ function App() {
                     >
                       Import audio file
                     </button>
+                      <button
+                      onClick={() => handleImportTranscript()}
+                      className="rounded-lg border border-border-default px-4 py-2 text-sm text-text-secondary hover:bg-bg-hover hover:text-text-primary"
+                    >
+                      Import transcript (.vtt)
+                    </button>
                     <p className="text-xs text-text-tertiary">
-                      or drag &amp; drop a WAV file here
+                      or drag &amp; drop a WAV or VTT file here
                     </p>
                   </>
                 )}
@@ -280,11 +312,11 @@ function App() {
             )}
 
           {/* Importing state */}
-          {importing && (
+          {(importing || importingTranscript) && (
             <div className="flex flex-1 flex-col items-center justify-center gap-3">
               <span className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-text-secondary border-t-transparent" />
               <p className="text-sm text-text-secondary">
-                Importing and transcribing...
+                {importingTranscript ? "Importing transcript..." : "Importing and transcribing..."}
               </p>
             </div>
           )}

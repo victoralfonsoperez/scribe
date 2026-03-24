@@ -89,6 +89,35 @@ export function registerMeetingIPC(
     },
   );
 
+  ipcMain.handle("meeting:import-transcript", async (_event, filePath?: string) => {
+    try {
+      let targetPath = filePath;
+
+      if (!targetPath) {
+        const result = await dialog.showOpenDialog({
+          title: "Import Transcript File",
+          filters: [{ name: "Transcript Files", extensions: ["vtt"] }],
+          properties: ["openFile"],
+        });
+        if (result.canceled || result.filePaths.length === 0) {
+          return { ok: false, error: "Cancelled" };
+        }
+        targetPath = result.filePaths[0];
+      }
+
+      const ext = path.extname(targetPath).toLowerCase();
+      if (ext !== ".vtt") {
+        return { ok: false, error: "Only VTT files are supported" };
+      }
+
+      const { meetingId } = meetingService.importTranscriptFile(targetPath);
+      return { ok: true, meetingId };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      return { ok: false, error: message };
+    }
+  });
+
   ipcMain.handle("meeting:import-audio", async (_event, filePath?: string) => {
     try {
       let targetPath = filePath;

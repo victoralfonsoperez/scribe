@@ -25,6 +25,22 @@ Be concise and use bullet points. If a section has no relevant content, write "N
 
   brief: `You are a meeting summarizer. Produce a brief 3-bullet TL;DR of this meeting transcript. Each bullet should capture one key takeaway. Be extremely concise.`,
 
+  decisions: `You are a meeting analyst. Extract the key outputs from this meeting transcript.
+
+## Decisions Made
+List every decision that was reached. For each decision, note who made or approved it if identifiable.
+
+## Action Items & Responsible Parties
+List every task or commitment. For each item, include:
+- What needs to be done
+- Who is responsible (name or role if mentioned)
+- Deadline if mentioned
+
+## Open Questions
+List anything left unresolved or requiring further discussion.
+
+If a section has no relevant content, write "None identified." Be specific and attribute ownership wherever the transcript allows.`,
+
   detailed: `You are a meeting summarizer. Produce comprehensive meeting notes from this transcript. Include:
 
 ## Overview
