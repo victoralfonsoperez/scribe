@@ -1,5 +1,5 @@
 import type Database from "better-sqlite3";
-import type { TranscriptSegment, Summary } from "../shared/types.js";
+import type { TranscriptSegment, Summary, Screenshot } from "../shared/types.js";
 
 export interface MeetingRow {
   id: string;
@@ -28,6 +28,16 @@ export interface SummaryRow {
   prompt: string;
   content: string;
   model: string;
+  created_at: number;
+}
+
+export interface ScreenshotRow {
+  id: string;
+  meeting_id: string;
+  timestamp: number;
+  relative_time: number;
+  file_path: string;
+  caption: string | null;
   created_at: number;
 }
 
@@ -106,6 +116,19 @@ export class MeetingRepository {
         WHERE segments_fts MATCH ?
         ORDER BY m.started_at DESC, s.segment_index ASC
       `),
+      insertScreenshot: this.db.prepare(`
+        INSERT INTO screenshots (id, meeting_id, timestamp, relative_time, file_path, caption, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `),
+      getScreenshots: this.db.prepare(`
+        SELECT * FROM screenshots WHERE meeting_id = ? ORDER BY relative_time ASC
+      `),
+      getScreenshot: this.db.prepare(`
+        SELECT * FROM screenshots WHERE id = ?
+      `),
+      deleteScreenshot: this.db.prepare(`
+        DELETE FROM screenshots WHERE id = ?
+      `),
     };
   }
 
@@ -172,6 +195,30 @@ export class MeetingRepository {
 
   deleteSummary(id: string): void {
     this.stmts.deleteSummary.run(id);
+  }
+
+  addScreenshot(screenshot: Screenshot): void {
+    this.stmts.insertScreenshot.run(
+      screenshot.id,
+      screenshot.meetingId,
+      screenshot.timestamp,
+      screenshot.relativeTime,
+      screenshot.filePath,
+      screenshot.caption,
+      screenshot.createdAt,
+    );
+  }
+
+  getScreenshots(meetingId: string): ScreenshotRow[] {
+    return this.stmts.getScreenshots.all(meetingId) as ScreenshotRow[];
+  }
+
+  getScreenshot(id: string): ScreenshotRow | undefined {
+    return this.stmts.getScreenshot.get(id) as ScreenshotRow | undefined;
+  }
+
+  deleteScreenshot(id: string): void {
+    this.stmts.deleteScreenshot.run(id);
   }
 
   searchSegments(query: string): SearchResultRow[] {

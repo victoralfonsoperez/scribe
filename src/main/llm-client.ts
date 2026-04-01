@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import fs from "node:fs";
 import type { SummarySettings } from "../shared/types.js";
 
 export interface LLMResponse {
@@ -6,22 +7,31 @@ export interface LLMResponse {
   model: string;
 }
 
+const MAX_SCREENSHOTS_FOR_SUMMARY = 10;
+
 export class LLMClient {
   async summarize(
     transcript: string,
     systemPrompt: string,
     settings: SummarySettings,
+    screenshotPaths?: string[],
   ): Promise<LLMResponse> {
     if (settings.provider === "ollama") {
       return this.summarizeWithOllama(transcript, systemPrompt, settings);
     }
-    return this.summarizeWithClaude(transcript, systemPrompt, settings);
+    return this.summarizeWithClaude(
+      transcript,
+      systemPrompt,
+      settings,
+      screenshotPaths,
+    );
   }
 
   private async summarizeWithClaude(
     transcript: string,
     systemPrompt: string,
     settings: SummarySettings,
+    screenshotPaths?: string[],
   ): Promise<LLMResponse> {
     if (!settings.apiKey) {
       throw new Error(
@@ -31,16 +41,37 @@ export class LLMClient {
 
     const client = new Anthropic({ apiKey: settings.apiKey });
 
+    // Build user message content — include screenshots if available
+    const userContent: Array<Anthropic.TextBlockParam | Anthropic.ImageBlockParam> = [];
+
+    const validPaths = (screenshotPaths ?? [])
+      .filter((p) => fs.existsSync(p))
+      .slice(0, MAX_SCREENSHOTS_FOR_SUMMARY);
+
+    if (validPaths.length > 0) {
+      userContent.push({
+        type: "text",
+        text: `The following ${validPaths.length} screenshot(s) were captured during the meeting:`,
+      });
+      for (const p of validPaths) {
+        const data = fs.readFileSync(p).toString("base64");
+        userContent.push({
+          type: "image",
+          source: { type: "base64", media_type: "image/png", data },
+        });
+      }
+    }
+
+    userContent.push({
+      type: "text",
+      text: `Here is the meeting transcript:\n\n${transcript}`,
+    });
+
     const message = await client.messages.create({
       model: "claude-sonnet-4-20250514",
       max_tokens: 4096,
       system: systemPrompt,
-      messages: [
-        {
-          role: "user",
-          content: `Here is the meeting transcript:\n\n${transcript}`,
-        },
-      ],
+      messages: [{ role: "user", content: userContent }],
     });
 
     const textBlock = message.content.find((b) => b.type === "text");

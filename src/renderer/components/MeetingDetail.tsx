@@ -1,16 +1,17 @@
-import { useCallback, useState } from "react";
-import type { ExportFormat } from "../../shared/types.js";
+import { useCallback, useEffect, useState } from "react";
+import type { ExportFormat, Screenshot } from "../../shared/types.js";
 import { useMeetingDetail } from "../hooks/useMeetings.js";
 import { useSummary } from "../hooks/useSummary.js";
 import TranscriptView from "./TranscriptView.js";
 import SummaryView from "./SummaryView.js";
+import ScreenshotGallery from "./ScreenshotGallery.js";
 
 interface MeetingDetailProps {
   meetingId: string;
   onBack: () => void;
 }
 
-type Tab = "transcript" | "summary";
+type Tab = "transcript" | "summary" | "screenshots";
 
 function formatDate(timestamp: number): string {
   return new Date(timestamp).toLocaleString("en-US", {
@@ -44,6 +45,18 @@ export default function MeetingDetail({
     deleteSummary,
   } = useSummary(meetingId);
   const [tab, setTab] = useState<Tab>("transcript");
+  const [screenshots, setScreenshots] = useState<Screenshot[]>([]);
+
+  useEffect(() => {
+    window.scribe.listScreenshots(meetingId).then(setScreenshots);
+  }, [meetingId]);
+
+  useEffect(() => {
+    const unsub = window.scribe.onScreenshotCaptured(() => {
+      window.scribe.listScreenshots(meetingId).then(setScreenshots);
+    });
+    return unsub;
+  }, [meetingId]);
   const [exporting, setExporting] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -160,19 +173,37 @@ export default function MeetingDetail({
           >
             Summary
           </button>
+          <button
+            onClick={() => setTab("screenshots")}
+            className={`border-b-2 px-3 py-2 text-xs font-medium transition-colors ${
+              tab === "screenshots"
+                ? "border-blue-500 text-text-primary"
+                : "border-transparent text-text-tertiary hover:text-text-secondary"
+            }`}
+          >
+            Screenshots
+          </button>
         </div>
       </div>
 
       {/* Tab content */}
-      {tab === "transcript" ? (
-        <TranscriptView segments={segments} status={{ state: "idle" }} />
-      ) : (
+      {tab === "transcript" && (
+        <TranscriptView
+          segments={segments}
+          status={{ state: "idle" }}
+          screenshots={screenshots}
+        />
+      )}
+      {tab === "summary" && (
         <SummaryView
           summaries={summaries}
           status={summaryStatus}
           onGenerate={generate}
           onDelete={deleteSummary}
         />
+      )}
+      {tab === "screenshots" && (
+        <ScreenshotGallery meetingId={meetingId} />
       )}
     </div>
   );

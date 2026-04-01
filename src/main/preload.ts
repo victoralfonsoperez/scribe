@@ -69,6 +69,16 @@ const api: ScribeAPI = {
   onWhisperInstallProgress: (callback) =>
     onEvent("whisper:install-progress", callback),
 
+  // Screenshots
+  captureScreenshot: () => ipcRenderer.invoke("screenshot:capture"),
+  listScreenshots: (meetingId) =>
+    ipcRenderer.invoke("screenshot:list", meetingId),
+  deleteScreenshot: (id) => ipcRenderer.invoke("screenshot:delete", id),
+  getScreenshotImage: (filePath) =>
+    ipcRenderer.invoke("screenshot:get-image", filePath),
+  onScreenshotCaptured: (callback) =>
+    onEvent("screenshot:captured", callback),
+
   // Tray
   sendTrayRecordingState: (recording) =>
     ipcRenderer.send("tray:recording-state", recording),

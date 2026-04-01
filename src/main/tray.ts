@@ -2,6 +2,7 @@ import { Tray, Menu, nativeImage, BrowserWindow, ipcMain, app } from "electron";
 
 let tray: Tray | null = null;
 let isRecording = false;
+let onCaptureScreenshot: (() => void) | null = null;
 
 function createTrayIcon(recording: boolean): Electron.NativeImage {
   // Create a 32x32 (16x16 @2x) template image for macOS menu bar
@@ -89,7 +90,9 @@ function createTrayIcon(recording: boolean): Electron.NativeImage {
 
 export function createTray(
   getMainWindow: () => BrowserWindow | null,
+  captureScreenshot?: () => void,
 ): Tray {
+  onCaptureScreenshot = captureScreenshot ?? null;
   const icon = createTrayIcon(false);
   tray = new Tray(icon);
   tray.setToolTip("Scribe");
@@ -128,6 +131,13 @@ function updateTrayMenu(): void {
         if (win && !win.isDestroyed()) {
           win.webContents.send("tray:toggle-recording");
         }
+      },
+    },
+    {
+      label: "Capture Screenshot",
+      enabled: isRecording,
+      click: () => {
+        onCaptureScreenshot?.();
       },
     },
     { type: "separator" },

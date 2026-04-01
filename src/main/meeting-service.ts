@@ -5,6 +5,7 @@ import type {
   MeetingRepository,
   MeetingRow,
   SegmentRow,
+  ScreenshotRow,
   SearchResultRow,
 } from "./meeting-repository.js";
 import type { TranscriptSegment } from "../shared/types.js";
@@ -16,6 +17,7 @@ export type ExportFormat = "markdown" | "text";
 export interface MeetingWithSegments {
   meeting: MeetingRow;
   segments: SegmentRow[];
+  screenshots: ScreenshotRow[];
 }
 
 export interface SearchResultGroup {
@@ -162,7 +164,8 @@ export class MeetingService {
     if (!meeting) return null;
 
     const segments = this.repo.getSegments(id);
-    return { meeting, segments };
+    const screenshots = this.repo.getScreenshots(id);
+    return { meeting, segments, screenshots };
   }
 
   renameMeeting(id: string, title: string): void {
@@ -198,7 +201,7 @@ export class MeetingService {
   }
 
   private formatMarkdown(data: MeetingWithSegments): string {
-    const { meeting, segments } = data;
+    const { meeting, segments, screenshots } = data;
     const lines: string[] = [];
 
     lines.push(`# ${meeting.title}`);
@@ -213,10 +216,32 @@ export class MeetingService {
     lines.push("## Transcript");
     lines.push("");
 
+    // Interleave screenshots into transcript by relative time
+    let ssIdx = 0;
     for (const seg of segments) {
+      // Insert screenshots whose relativeTime falls before this segment ends
+      while (
+        ssIdx < screenshots.length &&
+        screenshots[ssIdx].relative_time <= seg.end_time
+      ) {
+        const ss = screenshots[ssIdx];
+        const ssTime = this.formatTime(ss.relative_time);
+        lines.push(`> **[Screenshot at ${ssTime}]** \`${ss.file_path}\``);
+        lines.push("");
+        ssIdx++;
+      }
       const time = this.formatTime(seg.start_time);
       lines.push(`**[${time}]** ${seg.text}`);
       lines.push("");
+    }
+
+    // Any remaining screenshots after last segment
+    while (ssIdx < screenshots.length) {
+      const ss = screenshots[ssIdx];
+      const ssTime = this.formatTime(ss.relative_time);
+      lines.push(`> **[Screenshot at ${ssTime}]** \`${ss.file_path}\``);
+      lines.push("");
+      ssIdx++;
     }
 
     return lines.join("\n");
