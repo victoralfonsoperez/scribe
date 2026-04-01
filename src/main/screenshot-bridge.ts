@@ -2,6 +2,28 @@ import { ipcMain, BrowserWindow } from "electron";
 import type { ScreenshotService } from "./screenshot-service.js";
 import type { Screenshot } from "../shared/types.js";
 
+const HIDE_DELAY_MS = 250;
+
+async function hideAndCapture(
+  screenshotService: ScreenshotService,
+  win: BrowserWindow | null,
+): Promise<Screenshot | null> {
+  const shouldHide = win && !win.isDestroyed() && win.isVisible();
+
+  if (shouldHide) {
+    win.hide();
+    await new Promise((resolve) => setTimeout(resolve, HIDE_DELAY_MS));
+  }
+
+  try {
+    return await screenshotService.captureScreenshot();
+  } finally {
+    if (shouldHide && win && !win.isDestroyed()) {
+      win.show();
+    }
+  }
+}
+
 export function registerScreenshotIPC(
   screenshotService: ScreenshotService,
   getMainWindow: () => BrowserWindow | null,
@@ -10,12 +32,11 @@ export function registerScreenshotIPC(
 } {
   ipcMain.handle("screenshot:capture", async () => {
     try {
-      const screenshot = await screenshotService.captureScreenshot();
+      const win = getMainWindow();
+      const screenshot = await hideAndCapture(screenshotService, win);
       if (!screenshot) {
         return { ok: false, error: "No active recording" };
       }
-      // Push event to renderer for toast notification
-      const win = getMainWindow();
       if (win && !win.isDestroyed()) {
         win.webContents.send("screenshot:captured", screenshot);
       }
@@ -47,12 +68,10 @@ export function registerScreenshotIPC(
   // Helper to capture and notify from main-process triggers (tray, shortcut)
   async function captureAndNotify(): Promise<Screenshot | null> {
     try {
-      const screenshot = await screenshotService.captureScreenshot();
-      if (screenshot) {
-        const win = getMainWindow();
-        if (win && !win.isDestroyed()) {
-          win.webContents.send("screenshot:captured", screenshot);
-        }
+      const win = getMainWindow();
+      const screenshot = await hideAndCapture(screenshotService, win);
+      if (screenshot && win && !win.isDestroyed()) {
+        win.webContents.send("screenshot:captured", screenshot);
       }
       return screenshot;
     } catch {

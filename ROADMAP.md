@@ -101,6 +101,7 @@ Make it feel like a real app.
 - [x] Notification when summary generation completes
 - [x] Menu bar / tray icon with quick recording toggle
 - [ ] Global keyboard shortcut to start/stop *(deferred)*
+- [ ] ESC key to close screenshot lightbox *(deferred)*
 - [ ] Meeting auto-detection (optional — detect when Meet/Teams window is active) *(deferred)*
 - [x] Drag-and-drop audio file import (transcribe existing recordings)
 - [ ] Auto-update via electron-updater *(deferred)*
