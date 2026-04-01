@@ -25,16 +25,27 @@ Scribe captures system and microphone audio during meetings, transcribes it loca
 ## Prerequisites
 
 - macOS 13+ (Ventura or later, required for ScreenCaptureKit)
-- Node.js (see `.nvmrc`)
+- [fnm](https://github.com/Schniz/fnm) for Node version management
+- Node.js 22 (pinned in `.node-version`)
+- pnpm (via corepack — no global install needed)
 
 ## Getting started
 
 ```bash
-# Install dependencies
-npm install
+# Install the correct Node version
+fnm install
+
+# Enable corepack so pnpm is available without a global install
+corepack enable
+
+# Install dependencies (scripts are disabled for security — see .npmrc)
+pnpm install
+
+# Build the native audio addon
+pnpm run setup
 
 # Start in development mode
-npm run dev
+pnpm dev
 ```
 
 ## License
