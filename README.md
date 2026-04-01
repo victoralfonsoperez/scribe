@@ -4,12 +4,13 @@ Local-first meeting transcription and summarization for macOS.
 
 Scribe captures system and microphone audio during meetings, transcribes it locally using [whisper.cpp](https://github.com/ggerganov/whisper.cpp), and generates structured summaries via the Claude API.
 
-## Features (planned)
+## Features
 
 - System + microphone audio capture via ScreenCaptureKit / CoreAudio
 - Local transcription with whisper.cpp (no data leaves your machine)
 - AI-powered meeting summaries (action items, decisions, follow-ups)
 - Meeting history with full-text search
+- Screenshot capture during meetings, inline in the transcript timeline
 - Optional fully-local summarization via Ollama
 
 ## Tech stack
@@ -22,9 +23,16 @@ Scribe captures system and microphone audio during meetings, transcribes it loca
 - **Summarization**: Anthropic Claude API (Ollama fallback)
 - **Storage**: SQLite (better-sqlite3) + filesystem
 
+## Install
+
+```bash
+brew install --cask victoralfonsoperez/tap/scribe
+```
+
 ## Prerequisites
 
 - macOS 13+ (Ventura or later, required for ScreenCaptureKit)
+- Xcode Command Line Tools: `xcode-select --install`
 - [fnm](https://github.com/Schniz/fnm) for Node version management
 - Node.js 22 (pinned in `.node-version`)
 - pnpm (via corepack — no global install needed)
@@ -47,6 +55,14 @@ pnpm run setup
 # Start in development mode
 pnpm dev
 ```
+
+## Releasing a new version
+
+1. Bump the version in `package.json`
+2. Push a tag: `git tag v0.x.y && git push origin v0.x.y`
+3. The [release workflow](.github/workflows/release.yml) builds for arm64 and x64, creates the GitHub Release, and auto-updates the Homebrew tap
+
+> **First-time setup**: create a `github.com/victoralfonsoperez/homebrew-tap` repo and add a `TAP_TOKEN` secret (a GitHub PAT with `repo` scope for the tap) to this repository's settings.
 
 ## License
 
