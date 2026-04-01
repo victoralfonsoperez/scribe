@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { RecordingStatus } from "../shared/types.js";
+import type { RecordingStatus, Screenshot } from "../shared/types.js";
 import AudioLevelMeter from "./components/AudioLevelMeter.js";
 import RecordButton from "./components/RecordButton.js";
 import TranscriptView from "./components/TranscriptView.js";
@@ -24,6 +24,8 @@ function App() {
   const [importing, setImporting] = useState(false);
   const [importingTranscript, setImportingTranscript] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [screenshotToast, setScreenshotToast] = useState<Screenshot | null>(null);
+  const screenshotToastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cleanupRefs = useRef<(() => void)[]>([]);
   const handleClickRef = useRef<() => void>(() => {});
   const {
@@ -78,7 +80,17 @@ function App() {
       handleClickRef.current();
     });
 
-    cleanupRefs.current = [unsub1, unsub2, unsub3, unsub4];
+    const unsub5 = window.scribe.onScreenshotCaptured((screenshot) => {
+      setScreenshotToast(screenshot);
+      if (screenshotToastTimer.current) {
+        clearTimeout(screenshotToastTimer.current);
+      }
+      screenshotToastTimer.current = setTimeout(() => {
+        setScreenshotToast(null);
+      }, 3000);
+    });
+
+    cleanupRefs.current = [unsub1, unsub2, unsub3, unsub4, unsub5];
 
     return () => {
       cleanupRefs.current.forEach((fn) => fn());
@@ -164,6 +176,10 @@ function App() {
       setSelectedMeetingId(result.meetingId);
       setView("meeting");
     }
+  }, []);
+
+  const handleCaptureScreenshot = useCallback(async () => {
+    await window.scribe.captureScreenshot();
   }, []);
 
   const handleDrop = useCallback(
@@ -378,6 +394,28 @@ function App() {
                     )}
                   </div>
                 </div>
+
+                {state === "recording" && (
+                  <button
+                    onClick={handleCaptureScreenshot}
+                    aria-label="Capture screenshot (⌘⇧S)"
+                    title="Capture screenshot (⌘⇧S)"
+                    className="shrink-0 rounded-lg p-2 text-text-secondary hover:bg-bg-hover hover:text-text-primary"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      className="h-5 w-5"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M1 8a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 018.07 3h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0016.07 6H17a2 2 0 012 2v7a2 2 0 01-2 2H3a2 2 0 01-2-2V8zm13.5 3a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM10 14a3 3 0 100-6 3 3 0 000 6z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                )}
               </div>
 
               <TranscriptView
@@ -405,6 +443,25 @@ function App() {
       {/* Settings Modal */}
       {showSettings && (
         <ModelSelector onClose={() => setShowSettings(false)} />
+      )}
+
+      {/* Screenshot toast */}
+      {screenshotToast && (
+        <div className="pointer-events-none fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-lg border border-border-default bg-bg-secondary px-3 py-2 shadow-lg">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            className="h-4 w-4 shrink-0 text-green-400"
+          >
+            <path
+              fillRule="evenodd"
+              d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <span className="text-xs text-text-primary">Screenshot captured</span>
+        </div>
       )}
     </div>
   );

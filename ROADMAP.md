@@ -122,21 +122,21 @@ Identify *who* said *what* using WhisperX + pyannote.audio as a post-recording s
 
 **Approach**: Hybrid — whisper.cpp handles real-time 30-second chunk transcription during recording. After recording stops, WhisperX processes the full audio for speaker diarization, then merges speaker labels into the existing segments. This gives pyannote full audio context for accurate speaker identification without replacing the live transcription pipeline.
 
-### Phase 7 — Screenshot Capture (Meeting Notebook)
+### Phase 7 — Screenshot Capture (Meeting Notebook) ✅
 
 Capture screenshots on demand during a meeting to build a visual record alongside the transcript. Think of Scribe as a meeting notebook — audio gives you the words, screenshots give you the slides, diagrams, and shared screens.
 
-- [ ] Add `screenshots` table in SQLite (id, meetingId, timestamp, filePath, caption)
-- [ ] Screenshot capture via ScreenCaptureKit — capture current screen on demand
-- [ ] Tray icon menu item: "Capture Screenshot" (available while recording)
-- [ ] Global keyboard shortcut to capture screenshot during recording
-- [ ] In-app capture button in the recording toolbar
-- [ ] Store screenshots as PNGs in the app data directory alongside audio files
-- [ ] Visual indicator / toast when a screenshot is captured (non-disruptive)
-- [ ] Transcript view: inline screenshot thumbnails at the correct timestamp position
-- [ ] Meeting detail view: screenshot gallery / timeline view
-- [ ] Include screenshots in summary generation — send images to Claude (multimodal) for richer summaries that reference visual content
-- [ ] Export: include screenshots in markdown export (as embedded images or file references)
+- [x] Add `screenshots` table in SQLite (id, meetingId, timestamp, filePath, caption)
+- [x] Screenshot capture via `screencapture` CLI — capture current screen on demand
+- [x] Tray icon menu item: "Capture Screenshot" (available while recording)
+- [x] Global keyboard shortcut to capture screenshot during recording (⌘⇧S)
+- [x] In-app capture button in the recording toolbar
+- [x] Store screenshots as PNGs in the app data directory alongside audio files
+- [x] Visual indicator / toast when a screenshot is captured (non-disruptive)
+- [x] Transcript view: inline screenshot thumbnails at the correct timestamp position
+- [x] Meeting detail view: screenshot gallery / timeline view
+- [x] Include screenshots in summary generation — send images to Claude (multimodal) for richer summaries that reference visual content
+- [x] Export: include screenshots in markdown export (as embedded images or file references)
 
 **Approach**: User-initiated capture only — no automatic or periodic screenshots. The user decides what's worth capturing (an important slide, a diagram, a code snippet on screen) by pressing a shortcut or clicking a button. Screenshots are timestamped and linked to the transcript timeline so they appear in context. When generating summaries, attached screenshots are sent alongside the transcript to Claude's multimodal API, enabling the LLM to reference visual content in its output.
 

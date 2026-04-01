@@ -97,10 +97,14 @@ export class SummaryService {
       PROMPT_TEMPLATES[promptKey] ?? PROMPT_TEMPLATES["default"];
     const settings = await this.getSettings();
 
+    const screenshotRows = this.meetingRepo.getScreenshots(meetingId);
+    const screenshotPaths = screenshotRows.map((s) => s.file_path);
+
     const result = await this.llmClient.summarize(
       transcript,
       systemPrompt,
       settings,
+      screenshotPaths,
     );
 
     const summary: Summary = {

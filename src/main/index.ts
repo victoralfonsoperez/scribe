@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, globalShortcut } from "electron";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { registerAudioIPC } from "./audio-bridge.js";
@@ -14,6 +14,8 @@ import { LLMClient } from "./llm-client.js";
 import { SummaryService } from "./summary-service.js";
 import { registerSummaryIPC } from "./summary-bridge.js";
 import { createTray, destroyTray } from "./tray.js";
+import { ScreenshotService } from "./screenshot-service.js";
+import { registerScreenshotIPC } from "./screenshot-bridge.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -97,6 +99,13 @@ const llmClient = new LLMClient();
 const summaryService = new SummaryService(llmClient, meetingRepo);
 registerSummaryIPC(summaryService, () => mainWindow);
 
+// Set up screenshot service
+const screenshotService = new ScreenshotService(meetingRepo, meetingService);
+const { captureAndNotify } = registerScreenshotIPC(
+  screenshotService,
+  () => mainWindow,
+);
+
 app.whenReady().then(() => {
   if (process.platform === "darwin") {
     const iconPath = app.isPackaged
@@ -109,7 +118,15 @@ app.whenReady().then(() => {
     }
   }
   createWindow();
-  createTray(() => mainWindow);
+  createTray(() => mainWindow, () => { void captureAndNotify(); });
+
+  globalShortcut.register("CommandOrControl+Shift+S", () => {
+    void captureAndNotify();
+  });
+});
+
+app.on("will-quit", () => {
+  globalShortcut.unregisterAll();
 });
 
 app.on("window-all-closed", () => {

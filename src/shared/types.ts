@@ -93,6 +93,17 @@ export interface SearchResultGroup {
 
 export type ExportFormat = "markdown" | "text";
 
+// Screenshot types
+export interface Screenshot {
+  id: string;
+  meetingId: string;
+  timestamp: number;
+  relativeTime: number;
+  filePath: string;
+  caption: string | null;
+  createdAt: number;
+}
+
 // Summary types
 export interface Summary {
   id: string;
@@ -194,6 +205,17 @@ export interface ScribeAPI {
   onWhisperInstallProgress: (
     callback: (progress: WhisperInstallProgress) => void,
   ) => () => void;
+
+  // Screenshots
+  captureScreenshot: () => Promise<{
+    ok: boolean;
+    screenshot?: Screenshot;
+    error?: string;
+  }>;
+  listScreenshots: (meetingId: string) => Promise<Screenshot[]>;
+  deleteScreenshot: (id: string) => Promise<{ ok: boolean; error?: string }>;
+  getScreenshotImage: (filePath: string) => Promise<string | null>;
+  onScreenshotCaptured: (callback: (screenshot: Screenshot) => void) => () => void;
 
   // Tray
   sendTrayRecordingState: (recording: boolean) => void;

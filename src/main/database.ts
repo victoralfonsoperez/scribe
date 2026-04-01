@@ -61,6 +61,16 @@ function createSchema(db: Database.Database): void {
       model TEXT NOT NULL,
       created_at INTEGER NOT NULL DEFAULT (unixepoch('now') * 1000)
     );
+
+    CREATE TABLE IF NOT EXISTS screenshots (
+      id TEXT PRIMARY KEY,
+      meeting_id TEXT NOT NULL REFERENCES meetings(id) ON DELETE CASCADE,
+      timestamp INTEGER NOT NULL,
+      relative_time REAL NOT NULL,
+      file_path TEXT NOT NULL,
+      caption TEXT,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch('now') * 1000)
+    );
   `);
 
   // FTS5 virtual table (cannot use IF NOT EXISTS with virtual tables,
