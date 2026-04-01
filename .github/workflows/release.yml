@@ -9,16 +9,9 @@ permissions:
   contents: write
 
 jobs:
-  build:
-    name: Build (${{ matrix.arch }})
-    strategy:
-      matrix:
-        include:
-          - arch: arm64
-            runner: macos-15
-          - arch: x64
-            runner: macos-13
-    runs-on: ${{ matrix.runner }}
+  build-and-release:
+    name: Build & Release (arm64)
+    runs-on: macos-15
 
     steps:
       - uses: actions/checkout@v4
@@ -37,53 +30,25 @@ jobs:
       - name: Build native addon
         run: pnpm run setup
 
+      - name: Build app
+        run: pnpm run build
+
       - name: Build DMG
-        run: pnpm exec electron-builder --mac --${{ matrix.arch }}
+        run: pnpm exec electron-builder --mac --arm64
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload DMG artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: dmg-${{ matrix.arch }}
-          path: release/*.dmg
-          if-no-files-found: error
-
-  release:
-    name: Publish release & update cask
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download arm64 DMG
-        uses: actions/download-artifact@v4
-        with:
-          name: dmg-arm64
-          path: artifacts/arm64
-
-      - name: Download x64 DMG
-        uses: actions/download-artifact@v4
-        with:
-          name: dmg-x64
-          path: artifacts/x64
-
-      - name: Compute checksums
+      - name: Compute checksum
         id: sums
         run: |
-          ARM64_DMG=$(ls artifacts/arm64/*.dmg | head -1)
-          X64_DMG=$(ls artifacts/x64/*.dmg | head -1)
-          echo "arm64_sha=$(sha256sum "$ARM64_DMG" | cut -d' ' -f1)" >> $GITHUB_OUTPUT
-          echo "x64_sha=$(sha256sum "$X64_DMG" | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+          DMG=$(ls release/*.dmg | head -1)
+          echo "arm64_sha=$(shasum -a 256 "$DMG" | cut -d' ' -f1)" >> $GITHUB_OUTPUT
           echo "version=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            artifacts/arm64/*.dmg
-            artifacts/x64/*.dmg
+          files: release/*.dmg
           generate_release_notes: true
 
       - name: Update Homebrew tap
@@ -91,14 +56,12 @@ jobs:
           TAP_TOKEN: ${{ secrets.TAP_TOKEN }}
           VERSION: ${{ steps.sums.outputs.version }}
           ARM64_SHA: ${{ steps.sums.outputs.arm64_sha }}
-          X64_SHA: ${{ steps.sums.outputs.x64_sha }}
         run: |
           git clone https://x-access-token:${TAP_TOKEN}@github.com/victoralfonsoperez/homebrew-tap.git tap
           mkdir -p tap/Casks
           sed \
             -e "s/VERSION_PLACEHOLDER/${VERSION}/g" \
             -e "s/ARM64_SHA256_PLACEHOLDER/${ARM64_SHA}/g" \
-            -e "s/X64_SHA256_PLACEHOLDER/${X64_SHA}/g" \
             .github/homebrew/scribe.rb > tap/Casks/scribe.rb
           cd tap
           git config user.name "github-actions[bot]"
