@@ -49,6 +49,12 @@ Scribe is a local-first macOS Electron app for meeting transcription and summari
 - Write tests for business logic and data layer
 - Native audio code may require manual testing on macOS
 
+## Package management
+
+- Use **pnpm** (via corepack) — NEVER install packages globally with `npm install -g` or `pnpm add -g`
+- Enable via `corepack enable`; the `packageManager` field in `package.json` pins the exact version
+- Use **fnm** for Node version management — `.node-version` in the repo root pins the version
+
 ## Git workflow
 
 - Use feature branches for all development (never commit directly to main)

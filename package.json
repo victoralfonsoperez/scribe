@@ -6,17 +6,17 @@
   "description": "Local-first macOS app for meeting transcription and summarization",
   "author": "Victor",
   "license": "MIT",
+  "packageManager": "pnpm@10.33.0",
   "main": "dist-electron/main/index.js",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "rebuild": "node-gyp rebuild",
-    "postinstall": "node-gyp rebuild && electron-rebuild",
+    "setup": "node-gyp rebuild && electron-rebuild",
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "package": "npm run build && electron-builder --mac"
+    "package": "pnpm run build && electron-builder --mac"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
@@ -44,6 +44,11 @@
     "vite": "^6.2.0",
     "vite-plugin-electron": "^0.28.0",
     "vite-plugin-electron-renderer": "^0.14.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3"
+    ]
   },
   "build": {
     "appId": "com.scribe.app",
