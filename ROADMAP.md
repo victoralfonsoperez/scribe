@@ -145,26 +145,26 @@ Capture screenshots on demand during a meeting to build a visual record alongsid
 
 Bring Scribe to Windows while keeping the macOS experience intact. The core architecture (IPC, TypeScript services, SQLite, React renderer) is already platform-agnostic — the work concentrates on replacing macOS-native components and adding platform conditionals.
 
-#### 8a. Native Audio Capture (WASAPI)
+#### 8a. Native Audio Capture (WASAPI) ✅
 
 The entire native addon is Objective-C++ using ScreenCaptureKit/CoreAudio. Windows needs a parallel implementation.
 
-- [ ] Restructure `src/native/` into `darwin/`, `win32/`, `common/` directories
-- [ ] Extract `wav_writer.mm` → `common/wav_writer.cpp` (already pure C++, just rename)
-- [ ] Write `src/native/win32/audio_capture.cpp` using WASAPI
+- [x] Restructure `src/native/` into `darwin/`, `win32/`, `common/` directories
+- [x] Extract `wav_writer.mm` → `common/wav_writer.cpp` (already pure C++, just rename)
+- [x] Write `src/native/win32/audio_capture.cpp` using WASAPI
   - System audio loopback via `IAudioClient` with `AUDCLNT_STREAMFLAGS_LOOPBACK`
   - Microphone capture via WASAPI capture endpoint
   - Same N-API interface so `audio-bridge.ts` requires no changes
-- [ ] Permissions: return `{ mic: true, screen: true }` on Windows (no macOS-style prompts)
-- [ ] Update `binding.gyp` with OS conditions to select sources and link libraries per platform
+- [x] Permissions: return `{ mic: true, screen: true }` on Windows (no macOS-style prompts)
+- [x] Update `binding.gyp` with OS conditions to select sources and link libraries per platform
 
-#### 8b. Whisper.cpp Windows Build
+#### 8b. Whisper.cpp Windows Build ✅
 
-- [ ] Platform-conditional cmake flags (remove `-DWHISPER_METAL=ON`, use CPU-only on Windows)
-- [ ] Binary name: `whisper-cli.exe` on Windows
-- [ ] Skip `fixDylibs` step (macOS-only `otool`/`install_name_tool`)
-- [ ] Handle Windows cmake output paths (`Release/` subdirectory)
-- [ ] Windows-specific prerequisite messages (Visual Studio Build Tools instead of Xcode)
+- [x] Platform-conditional cmake flags (remove `-DWHISPER_METAL=ON`, use CPU-only on Windows)
+- [x] Binary name: `whisper-cli.exe` on Windows
+- [x] Skip `fixDylibs` step (macOS-only `otool`/`install_name_tool`)
+- [x] Handle Windows cmake output paths (`Release/` subdirectory)
+- [x] Windows-specific prerequisite messages (Visual Studio Build Tools instead of Xcode)
 
 #### 8c. UI Platform Adaptation
 
