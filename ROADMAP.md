@@ -174,10 +174,10 @@ The entire native addon is Objective-C++ using ScreenCaptureKit/CoreAudio. Windo
 
 #### 8d. Packaging & Distribution
 
-- [ ] Add `win` target in electron-builder config (NSIS installer, x64 + arm64)
-- [ ] Add `package:win` script
-- [ ] Convert app icon to `.ico` format for Windows
-- [ ] Document Windows build prerequisites (Visual Studio Build Tools, cmake, git)
+- [x] Add `win` target in electron-builder config (NSIS installer, x64 + arm64)
+- [x] Add `package:win` script
+- [x] Convert app icon to `.ico` format for Windows
+- [x] Document Windows build prerequisites (Visual Studio Build Tools, cmake, git)
 
 #### 8e. Tray Icon & Platform Behavior
 
