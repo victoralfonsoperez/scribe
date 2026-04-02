@@ -225,8 +225,8 @@ function App() {
 
   return (
     <div className="flex h-screen flex-col bg-bg-primary text-text-primary">
-      {/* Header — pl-20 avoids macOS traffic light buttons */}
-      <div className="flex items-center justify-between border-b border-border-default py-3 pl-20 pr-4">
+      {/* Header — pl-20 avoids macOS traffic light buttons; standard pl-4 on Windows */}
+      <div className={`flex items-center justify-between border-b border-border-default py-3 pr-4 ${window.scribe.platform === "darwin" ? "pl-20" : "pl-4"}`}>
         <h1 className="text-lg font-bold">Scribe</h1>
         <div className="flex items-center gap-2">
           {/* Tab navigation */}

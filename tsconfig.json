@@ -15,5 +15,5 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "dist-electron", "release"]
+  "exclude": ["node_modules", "dist", "dist-electron", "release", "src/**/__tests__"]
 }
