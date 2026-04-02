@@ -7,7 +7,10 @@ import { promisify } from "node:util";
 const execFile = promisify(execFileCb);
 
 const WHISPER_REPO_URL = "https://github.com/ggerganov/whisper.cpp.git";
-const BINARY_NAME = "whisper-cli";
+
+// On Windows the built binary has a .exe extension
+const BINARY_NAME =
+  process.platform === "win32" ? "whisper-cli.exe" : "whisper-cli";
 
 export interface WhisperStatus {
   installed: boolean;
@@ -111,34 +114,48 @@ export class WhisperManager {
       const cmakeBuildDir = path.join(srcDir, "build");
       await fs.promises.mkdir(cmakeBuildDir, { recursive: true });
 
-      await execFile(
-        "cmake",
-        [
-          "..",
-          "-DCMAKE_BUILD_TYPE=Release",
-          "-DWHISPER_COREML=OFF",
-          "-DWHISPER_METAL=ON",
-          "-DBUILD_SHARED_LIBS=OFF",
-        ],
-        { cwd: cmakeBuildDir, timeout: 60000 },
-      );
+      // Platform-conditional cmake flags:
+      // - Metal acceleration is macOS-only; use CPU-only on Windows
+      const cmakeConfigArgs = [
+        "..",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DWHISPER_COREML=OFF",
+        "-DBUILD_SHARED_LIBS=OFF",
+      ];
+      if (process.platform !== "win32") {
+        cmakeConfigArgs.push("-DWHISPER_METAL=ON");
+      }
+
+      await execFile("cmake", cmakeConfigArgs, {
+        cwd: cmakeBuildDir,
+        timeout: 60000,
+      });
 
       this.emitProgress(50, "Building whisper.cpp (this may take a few minutes)...");
 
       // Build with parallel jobs
       const cpuCount = (await import("node:os")).cpus().length;
-      await execFile("cmake", ["--build", ".", "--config", "Release", "-j", String(cpuCount)], {
-        cwd: cmakeBuildDir,
-        timeout: 600000, // 10 minutes
-        maxBuffer: 50 * 1024 * 1024,
-      });
+      await execFile(
+        "cmake",
+        ["--build", ".", "--config", "Release", "-j", String(cpuCount)],
+        {
+          cwd: cmakeBuildDir,
+          timeout: 600000, // 10 minutes
+          maxBuffer: 50 * 1024 * 1024,
+        },
+      );
 
       this.emitProgress(90, "Installing binary...");
 
-      // Find the built binary
+      // Find the built binary.
+      // On Windows with MSVC the output lands in a Release/ subdirectory.
       const possiblePaths = [
         path.join(cmakeBuildDir, "bin", BINARY_NAME),
         path.join(cmakeBuildDir, BINARY_NAME),
+        // Windows: MSVC multi-config generator puts output in Release/
+        path.join(cmakeBuildDir, "bin", "Release", BINARY_NAME),
+        path.join(cmakeBuildDir, "Release", BINARY_NAME),
+        // Legacy whisper.cpp binary name (pre-rename)
         path.join(cmakeBuildDir, "bin", "main"),
         path.join(cmakeBuildDir, "main"),
       ];
@@ -152,9 +169,10 @@ export class WhisperManager {
       }
 
       if (!builtBinary) {
-        // Search recursively
+        // Fall back to recursive search
         builtBinary = await this.findBinary(cmakeBuildDir, BINARY_NAME);
-        if (!builtBinary) {
+        // On macOS also try the legacy 'main' binary name
+        if (!builtBinary && process.platform !== "win32") {
           builtBinary = await this.findBinary(cmakeBuildDir, "main");
         }
       }
@@ -168,12 +186,18 @@ export class WhisperManager {
       // Copy binary to bin directory
       const targetPath = path.join(this.binDir, BINARY_NAME);
       await fs.promises.copyFile(builtBinary, targetPath);
-      await fs.promises.chmod(targetPath, 0o755);
 
-      this.emitProgress(90, "Fixing library paths...");
+      // Set executable bit on Unix; not needed (or meaningful) on Windows
+      if (process.platform !== "win32") {
+        await fs.promises.chmod(targetPath, 0o755);
+      }
 
-      // Find and copy any required dylibs, then fix rpaths
-      await this.fixDylibs(cmakeBuildDir, targetPath);
+      // Fix macOS dylib rpaths so the binary is self-contained.
+      // otool / install_name_tool are macOS-only tools; skip on Windows.
+      if (process.platform === "darwin") {
+        this.emitProgress(90, "Fixing library paths...");
+        await this.fixDylibs(cmakeBuildDir, targetPath);
+      }
 
       this.emitProgress(95, "Cleaning up build files...");
 
@@ -196,17 +220,21 @@ export class WhisperManager {
     try {
       await execFile("git", ["--version"], { timeout: 5000 });
     } catch {
-      throw new Error(
-        "git is required to install whisper.cpp. Please install Xcode Command Line Tools: xcode-select --install",
-      );
+      const msg =
+        process.platform === "win32"
+          ? "git is required to install whisper.cpp. Install Git for Windows from https://git-scm.com"
+          : "git is required to install whisper.cpp. Please install Xcode Command Line Tools: xcode-select --install";
+      throw new Error(msg);
     }
 
     try {
       await execFile("cmake", ["--version"], { timeout: 5000 });
     } catch {
-      throw new Error(
-        "cmake is required to build whisper.cpp. Install it via: brew install cmake",
-      );
+      const msg =
+        process.platform === "win32"
+          ? "cmake is required to build whisper.cpp. Install Visual Studio Build Tools (includes cmake) from https://visualstudio.microsoft.com/visual-cpp-build-tools"
+          : "cmake is required to build whisper.cpp. Install it via: brew install cmake";
+      throw new Error(msg);
     }
   }
 
