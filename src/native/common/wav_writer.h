@@ -10,6 +10,9 @@ public:
   WavWriter(uint32_t sampleRate = 48000, uint16_t channels = 2);
   ~WavWriter();
 
+  // Reconfigure sample rate and channels before opening (no-op if already open)
+  void reconfigure(uint32_t sampleRate, uint16_t channels);
+
   bool open(const std::string &path);
   bool write(const float *data, size_t frameCount);
   bool finalize();

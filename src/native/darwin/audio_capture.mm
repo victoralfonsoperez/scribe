@@ -11,7 +11,7 @@
 
 #include <napi.h>
 
-#include "wav_writer.h"
+#include "../common/wav_writer.h"
 
 // ---------------------------------------------------------------------------
 // SCStream delegate
