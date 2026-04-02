@@ -168,9 +168,9 @@ The entire native addon is Objective-C++ using ScreenCaptureKit/CoreAudio. Windo
 
 #### 8c. UI Platform Adaptation
 
-- [ ] Platform-conditional `titleBarStyle`: `hiddenInset` on macOS, standard frame on Windows
-- [ ] Expose `process.platform` to renderer via preload script
-- [ ] Conditional header padding (`pl-20` only on macOS for traffic light buttons)
+- [x] Platform-conditional `titleBarStyle`: `hiddenInset` on macOS, standard frame on Windows
+- [x] Expose `process.platform` to renderer via preload script
+- [x] Conditional header padding (`pl-20` only on macOS for traffic light buttons)
 
 #### 8d. Packaging & Distribution
 
