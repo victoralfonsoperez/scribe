@@ -29,24 +29,67 @@ Scribe captures system and microphone audio during meetings, transcribes it loca
 brew install --cask victoralfonsoperez/tap/scribe
 ```
 
-## Prerequisites
+## Development setup
 
-- macOS 13+ (Ventura or later, required for ScreenCaptureKit)
-- Xcode Command Line Tools: `xcode-select --install`
-- [fnm](https://github.com/Schniz/fnm) for Node version management
-- Node.js 22 (pinned in `.node-version`)
-- pnpm (via corepack — no global install needed)
+### macOS (13+ / Ventura required)
 
-## Getting started
+**Prerequisites:**
 
 ```bash
-# Install the correct Node version
-fnm install
+# Xcode Command Line Tools (git, clang, make)
+xcode-select --install
 
-# Enable corepack so pnpm is available without a global install
+# fnm — Node version manager
+brew install fnm
+# Add to your shell profile (~/.zshrc or ~/.bashrc), then restart your shell:
+#   eval "$(fnm env --use-on-cd)"
+```
+
+**First-time setup:**
+
+```bash
+# Install and activate the pinned Node version (reads .node-version)
+fnm install
+fnm use
+
+# Enable corepack (one-time per machine — makes pnpm available without a global install)
 corepack enable
 
-# Install dependencies (scripts are disabled for security — see .npmrc)
+# Install dependencies (install scripts are disabled for security — see .npmrc)
+pnpm install
+
+# Build the native audio addon
+pnpm run setup
+
+# Start in development mode
+pnpm dev
+```
+
+### Windows
+
+**Prerequisites:**
+
+- [Visual Studio Build Tools 2022](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022) — select the **Desktop development with C++** workload
+- [Git for Windows](https://git-scm.com/download/win)
+- [cmake](https://cmake.org/download/) — or via winget: `winget install Kitware.CMake`
+- [fnm](https://github.com/Schniz/fnm) — Node version manager:
+  ```powershell
+  winget install Schniz.fnm
+  # Add to your PowerShell profile ($PROFILE), then restart:
+  #   fnm env --use-on-cd | Out-String | Invoke-Expression
+  ```
+
+**First-time setup (PowerShell):**
+
+```powershell
+# Install and activate the pinned Node version (reads .node-version)
+fnm install
+fnm use
+
+# Enable corepack (one-time per machine)
+corepack enable
+
+# Install dependencies
 pnpm install
 
 # Build the native audio addon
