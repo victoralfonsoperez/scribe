@@ -187,8 +187,8 @@ The entire native addon is Objective-C++ using ScreenCaptureKit/CoreAudio. Windo
 
 #### 8f. Process & Signal Handling
 
-- [ ] Verify `SIGTERM` process kill works correctly on Windows (Node translates to `TerminateProcess`)
-- [ ] Confirm `killed` property check in transcription service handles Windows behavior
+- [x] Verify `SIGTERM` process kill works correctly on Windows (Node translates to `TerminateProcess`)
+- [x] Confirm `killed` property check in transcription service handles Windows behavior
 
 **Risk assessment**: The WASAPI audio addon is the highest-risk item — COM threading requirements and loopback capture setup need careful handling. Whisper.cpp build is medium risk (users need VS Build Tools). Everything else is low risk (straightforward platform conditionals).
 

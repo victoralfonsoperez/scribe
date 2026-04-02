@@ -56,7 +56,14 @@ export class TranscriptionService {
   async stop(): Promise<void> {
     this.queue = [];
     if (this.currentProcess) {
-      this.currentProcess.kill("SIGTERM");
+      try {
+        // On Windows, Node translates SIGTERM to TerminateProcess().
+        // Wrapping in try/catch handles the race where the process exits
+        // naturally between the null-check above and the kill() call.
+        this.currentProcess.kill("SIGTERM");
+      } catch {
+        // Process already exited — nothing to do.
+      }
       this.currentProcess = null;
     }
     this.processing = false;
@@ -167,7 +174,10 @@ export class TranscriptionService {
           this.currentProcess = null;
 
           if (err) {
-            // Killed by us (stop) — don't report error
+            // Killed by us (stop()) — don't report as an error.
+            // On Unix: err.signal === "SIGTERM".
+            // On Windows: Node calls TerminateProcess() so err.signal is null,
+            // but err.killed is true because child.killed was set by our kill() call.
             if (
               (err as { signal?: string }).signal === "SIGTERM" ||
               (err as { killed?: boolean }).killed
