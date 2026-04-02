@@ -36,7 +36,7 @@ const createWindow = () => {
     backgroundColor: "#030712",
     icon: app.isPackaged
       ? path.join(process.resourcesPath, "icon.png")
-      : path.join(__dirname, "../../build/icon.png"),
+      : path.join(__dirname, "../../resources/icon.png"),
     titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "default",
     webPreferences: {
       preload: path.join(__dirname, "../preload/preload.js"),
@@ -110,7 +110,7 @@ app.whenReady().then(() => {
   if (process.platform === "darwin") {
     const iconPath = app.isPackaged
       ? path.join(process.resourcesPath, "icon.png")
-      : path.join(__dirname, "../../build/icon.png");
+      : path.join(__dirname, "../../resources/icon.png");
     try {
       app.dock?.setIcon(iconPath);
     } catch {
