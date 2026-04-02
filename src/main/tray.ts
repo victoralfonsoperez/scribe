@@ -5,9 +5,8 @@ let isRecording = false;
 let onCaptureScreenshot: (() => void) | null = null;
 
 function createTrayIcon(recording: boolean): Electron.NativeImage {
-  // Create a 32x32 (16x16 @2x) template image for macOS menu bar
-  // Using a simple microphone shape drawn with raw pixel data
-  const size = 22;
+  // macOS menu bar icons are 22×22; Windows system tray icons are 16×16
+  const size = process.platform === "win32" ? 16 : 22;
   const canvas = Buffer.alloc(size * size * 4, 0);
 
   const setPixel = (x: number, y: number, alpha: number) => {
@@ -51,37 +50,40 @@ function createTrayIcon(recording: boolean): Electron.NativeImage {
     }
   };
 
-  // Draw microphone icon
-  const cx = 11;
+  // Draw microphone icon — all coordinates scale proportionally from 22px baseline
+  const s = (n: number) => Math.round(n * (size / 22));
+  const cx = Math.round(size / 2);
   const a = 220;
 
   // Mic head (rounded rect via circle + rect)
-  fillCircle(cx, 5, 3, a);
-  fillRect(cx - 3, 5, 7, 6, a);
-  fillCircle(cx, 11, 3, a);
+  fillCircle(cx, s(5), s(3), a);
+  fillRect(cx - s(3), s(5), s(7), s(6), a);
+  fillCircle(cx, s(11), s(3), a);
 
   // Mic stand arc (approximate with pixels)
   for (let angle = 0; angle <= Math.PI; angle += 0.1) {
-    const rx = 5;
-    const ry = 5;
+    const rx = s(5);
+    const ry = s(5);
     const px = cx + rx * Math.cos(angle);
-    const py = 10 + ry * Math.sin(angle);
+    const py = s(10) + ry * Math.sin(angle);
     setPixel(Math.round(px), Math.round(py), a);
     setPixel(Math.round(px) + 1, Math.round(py), a);
   }
 
   // Stem
-  fillRect(cx - 1, 15, 3, 3, a);
+  fillRect(cx - s(1), s(15), s(3), s(3), a);
 
   // Base
-  fillRect(cx - 3, 18, 7, 2, a);
+  fillRect(cx - s(3), s(18), s(7), s(2), a);
 
   const img = nativeImage.createFromBuffer(canvas, {
     width: size,
     height: size,
   });
 
-  if (!recording) {
+  // setTemplateImage is macOS-only — it makes the icon adapt to light/dark
+  // menu bar automatically. Skip on Windows where it has no effect.
+  if (!recording && process.platform === "darwin") {
     img.setTemplateImage(true);
   }
 
@@ -99,6 +101,10 @@ export function createTray(
 
   updateTrayMenu();
 
+  // On macOS, setContextMenu() intercepts all tray clicks so this handler is
+  // effectively a no-op there — the menu appears directly on click.
+  // On Windows, left-click fires "click" (show window) and right-click fires
+  // "right-click" (show context menu).
   tray.on("click", () => {
     const win = getMainWindow();
     if (win) {
@@ -107,6 +113,12 @@ export function createTray(
       win.focus();
     }
   });
+
+  if (process.platform === "win32") {
+    tray.on("right-click", () => {
+      tray?.popUpContextMenu();
+    });
+  }
 
   // Listen for recording state changes from the renderer
   ipcMain.on("tray:recording-state", (_event, recording: boolean) => {
