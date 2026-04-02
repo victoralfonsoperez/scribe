@@ -181,9 +181,9 @@ The entire native addon is Objective-C++ using ScreenCaptureKit/CoreAudio. Windo
 
 #### 8e. Tray Icon & Platform Behavior
 
-- [ ] Guard `setTemplateImage(true)` (macOS-only API)
-- [ ] Adjust tray icon size (16x16 for Windows vs 22x22 for macOS)
-- [ ] Verify tray click behavior on Windows (left-click vs right-click context menu)
+- [x] Guard `setTemplateImage(true)` (macOS-only API)
+- [x] Adjust tray icon size (16x16 for Windows vs 22x22 for macOS)
+- [x] Verify tray click behavior on Windows (left-click vs right-click context menu)
 
 #### 8f. Process & Signal Handling
 
