@@ -17,6 +17,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "package": "pnpm run build && electron-builder --mac",
+    "package:win": "pnpm run build && electron-builder --win",
     "package:publish": "pnpm run build && electron-builder --mac --publish always",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -72,6 +73,22 @@
       "entitlements": "resources/entitlements.mac.plist",
       "entitlementsInherit": "resources/entitlements.mac.plist",
       "hardenedRuntime": true
+    },
+    "win": {
+      "icon": "resources/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
     },
     "publish": [
       {
