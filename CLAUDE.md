@@ -27,13 +27,13 @@ Scribe is a local-first macOS Electron app for meeting transcription and summari
 - Prefer `const` over `let`; avoid `var`
 - Use async/await over raw promises
 - Keep main process and renderer concerns cleanly separated
-- Native addon code is Objective-C++ (`.mm` files) using node-addon-api
+- Native addon code uses node-addon-api; platform-specific code is Objective-C++ (`.mm`) on macOS and C++ (`.cpp`) on Windows
 
 ## File structure conventions
 
 - `src/main/` — Electron main process code
 - `src/renderer/` — React frontend code
-- `src/native/` — Native addon code (audio capture)
+- `src/native/` — Native addon code (audio capture); split into `darwin/`, `win32/`, `common/`
 - `src/shared/` — Types and utilities shared between main and renderer
 
 ## Key patterns
