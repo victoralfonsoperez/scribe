@@ -127,6 +127,7 @@ export interface SummaryStatus {
 }
 
 export interface ScribeAPI {
+  platform: NodeJS.Platform;
   getVersion: () => Promise<string>;
   startRecording: () => Promise<{ ok: boolean; error?: string }>;
   stopRecording: () => Promise<{ ok: boolean; error?: string }>;

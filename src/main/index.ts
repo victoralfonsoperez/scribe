@@ -37,7 +37,7 @@ const createWindow = () => {
     icon: app.isPackaged
       ? path.join(process.resourcesPath, "icon.png")
       : path.join(__dirname, "../../build/icon.png"),
-    titleBarStyle: "hiddenInset",
+    titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "default",
     webPreferences: {
       preload: path.join(__dirname, "../preload/preload.js"),
       contextIsolation: true,

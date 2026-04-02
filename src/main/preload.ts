@@ -9,6 +9,7 @@ function onEvent<T>(channel: string, callback: (data: T) => void): () => void {
 }
 
 const api: ScribeAPI = {
+  platform: process.platform,
   getVersion: () => ipcRenderer.invoke("get-version"),
   startRecording: () => ipcRenderer.invoke("recording:start"),
   stopRecording: () => ipcRenderer.invoke("recording:stop"),
