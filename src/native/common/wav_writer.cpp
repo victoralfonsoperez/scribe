@@ -1,6 +1,5 @@
 #include "wav_writer.h"
 #include <algorithm>
-#include <cmath>
 
 WavWriter::WavWriter(uint32_t sampleRate, uint16_t channels)
     : sampleRate_(sampleRate), channels_(channels), dataSize_(0),
@@ -9,6 +8,13 @@ WavWriter::WavWriter(uint32_t sampleRate, uint16_t channels)
 WavWriter::~WavWriter() {
   if (isOpen_) {
     finalize();
+  }
+}
+
+void WavWriter::reconfigure(uint32_t sampleRate, uint16_t channels) {
+  if (!isOpen_) {
+    sampleRate_ = sampleRate;
+    channels_ = channels;
   }
 }
 
@@ -65,7 +71,7 @@ bool WavWriter::write(const float *data, size_t frameCount) {
   std::vector<int16_t> buffer(sampleCount);
 
   for (size_t i = 0; i < sampleCount; i++) {
-    float sample = std::clamp(data[i], -1.0f, 1.0f);
+    float sample = std::max(-1.0f, std::min(1.0f, data[i]));
     buffer[i] = static_cast<int16_t>(sample * 32767.0f);
   }
 
