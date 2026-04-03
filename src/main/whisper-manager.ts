@@ -112,6 +112,8 @@ export class WhisperManager {
       this.emitProgress(30, "Configuring build with cmake...");
 
       const cmakeBuildDir = path.join(srcDir, "build");
+      // Always start with a clean cmake build dir to avoid stale cache conflicts
+      await fs.promises.rm(cmakeBuildDir, { recursive: true, force: true });
       await fs.promises.mkdir(cmakeBuildDir, { recursive: true });
 
       // Platform-conditional cmake flags:
