@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain, globalShortcut } from "electron";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { log } from "./logger.js";
 import { registerAudioIPC } from "./audio-bridge.js";
 import {
   createTranscriptionServices,
@@ -16,6 +17,14 @@ import { registerSummaryIPC } from "./summary-bridge.js";
 import { createTray, destroyTray } from "./tray.js";
 import { ScreenshotService } from "./screenshot-service.js";
 import { registerScreenshotIPC } from "./screenshot-bridge.js";
+
+process.on("uncaughtException", (err) => {
+  log.error("uncaughtException", err);
+});
+
+process.on("unhandledRejection", (reason) => {
+  log.error("unhandledRejection", reason);
+});
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -55,12 +64,17 @@ const createWindow = () => {
 
 ipcMain.handle("get-version", () => app.getVersion());
 
+log.info("app starting", { platform: process.platform, arch: process.arch, version: app.getVersion() });
+
 // Initialize database
+log.info("initializing database");
 const db = initDatabase();
 const meetingRepo = new MeetingRepository(db);
 const meetingService = new MeetingService(meetingRepo);
+log.info("database ready");
 
 // Set up transcription services
+log.info("setting up transcription services");
 const { whisperManager, modelManager, transcriptionService } =
   createTranscriptionServices();
 
@@ -106,7 +120,10 @@ const { captureAndNotify } = registerScreenshotIPC(
   () => mainWindow,
 );
 
+log.info("registering IPC handlers done, waiting for app ready");
+
 app.whenReady().then(() => {
+  log.info("app ready");
   if (process.platform === "darwin") {
     const iconPath = app.isPackaged
       ? path.join(process.resourcesPath, "icon.png")
@@ -117,7 +134,9 @@ app.whenReady().then(() => {
       // Icon not found — continue with default
     }
   }
+  log.info("creating window");
   createWindow();
+  log.info("creating tray");
   createTray(() => mainWindow, () => { void captureAndNotify(); });
 
   globalShortcut.register("CommandOrControl+Shift+S", () => {
