@@ -122,7 +122,10 @@ export class WhisperManager {
         "-DWHISPER_COREML=OFF",
         "-DBUILD_SHARED_LIBS=OFF",
       ];
-      if (process.platform !== "win32") {
+      if (process.platform === "win32") {
+        // Force x64 — ARM64 MSVC toolset is rarely available
+        cmakeConfigArgs.push("-A", "x64");
+      } else {
         cmakeConfigArgs.push("-DWHISPER_METAL=ON");
       }
 
