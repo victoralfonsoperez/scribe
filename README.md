@@ -29,6 +29,24 @@ Scribe captures system and microphone audio during meetings, transcribes it loca
 brew install --cask victoralfonsoperez/tap/scribe
 ```
 
+## Prerequisites for transcription
+
+Scribe builds [whisper.cpp](https://github.com/ggerganov/whisper.cpp) locally on first use. This requires **git** and **cmake** to be installed and available in your PATH.
+
+**macOS:**
+```bash
+xcode-select --install  # provides git
+brew install cmake
+```
+
+**Windows:**
+```powershell
+winget install -e --id Git.Git
+winget install -e --id Kitware.CMake
+```
+
+After installing, restart the app and go to **Settings → Install** to set up the transcription engine.
+
 ## Development setup
 
 ### macOS (13+ / Ventura required)
@@ -38,6 +56,9 @@ brew install --cask victoralfonsoperez/tap/scribe
 ```bash
 # Xcode Command Line Tools (git, clang, make)
 xcode-select --install
+
+# cmake (required to build whisper.cpp)
+brew install cmake
 
 # fnm — Node version manager
 brew install fnm
