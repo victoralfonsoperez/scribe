@@ -54,7 +54,20 @@
     "onlyBuiltDependencies": [
       "better-sqlite3",
       "electron"
-    ]
+    ],
+    "overrides": {
+      "brace-expansion@>=4.0.0 <5.0.5": ">=5.0.5",
+      "lodash@>=4.0.0 <=4.17.23": ">=4.18.0",
+      "lodash@<=4.17.23": ">=4.18.0",
+      "electron@>=41.0.0-alpha.1 <41.0.3": ">=41.0.3",
+      "electron@>=41.0.0-alpha.1 <41.1.0": ">=41.1.0",
+      "vite@<=6.4.1": ">=6.4.2",
+      "vite@>=6.0.0 <=6.4.1": ">=6.4.2",
+      "postcss@<8.5.10": ">=8.5.10",
+      "@xmldom/xmldom@<0.8.12": ">=0.8.12",
+      "ip-address@<=10.1.0": ">=10.1.1",
+      "@xmldom/xmldom@<0.8.13": ">=0.8.13"
+    }
   },
   "build": {
     "appId": "com.scribe.app",
