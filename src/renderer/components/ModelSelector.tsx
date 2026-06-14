@@ -319,7 +319,7 @@ export default function ModelSelector({ onClose }: ModelSelectorProps) {
           )}
 
           {tab === "summarization" && (
-            <SummarySettings onClose={onClose} />
+            <SummarySettings/>
           )}
 
           {tab === "appearance" && (

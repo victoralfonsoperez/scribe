@@ -1,11 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { SummarySettings as SummarySettingsType } from "../../shared/types.js";
 
-interface SummarySettingsProps {
-  onClose: () => void;
-}
-
-export default function SummarySettings({ onClose }: SummarySettingsProps) {
+export default function SummarySettings() {
   const [settings, setSettings] = useState<SummarySettingsType>({
     apiKey: "",
     provider: "claude",
