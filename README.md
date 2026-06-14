@@ -79,6 +79,9 @@ corepack enable
 # Install dependencies (install scripts are disabled for security — see .npmrc)
 pnpm install
 
+# Rebuild the sqlite binary
+npx electron-rebuild -f -w better-sqlite3
+
 # Build the native audio addon
 pnpm run setup
 
